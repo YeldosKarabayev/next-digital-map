@@ -1,0 +1,94 @@
+import { useState, useEffect } from "react";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { db } from "@/lib/firebaseConfig";
+import { EditIcon } from "lucide-react";
+import { Dialog, DialogHeader, DialogContent, DialogTitle } from "./ui/dialog";
+import { Input } from "./ui/input";
+import { Button } from "./ui/Button";
+
+interface EditOperatorFormProps {
+  operatorId: string;
+}
+
+export default function EditOperatorForm({ operatorId }: EditOperatorFormProps) {
+  const [name, setName] = useState("");
+  const [pointIcon, setIconUrl] = useState(""); // Исправлено название переменной
+  const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchOperator = async () => {
+      try {
+        const docRef = doc(db, "operators", operatorId);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          setName(docSnap.data().name);
+          setIconUrl(docSnap.data().pointIcon || ""); // Если нет иконки, ставим пустую строку
+        } else {
+          console.error("Оператор не найден!");
+        }
+      } catch (error) {
+        console.error("Ошибка загрузки оператора:", error);
+      }
+    };
+
+    if (open) {
+      fetchOperator();
+    }
+  }, [operatorId, open]);
+
+  const handleUpdateOperator = async () => {
+    setLoading(true);
+
+    try {
+      await updateDoc(doc(db, "operators", operatorId), {
+        name,
+        pointIcon, // Используем правильное название поля
+      });
+
+      //onUpdate(); // Обновляем список операторов
+      setOpen(false); // Закрываем модалку
+    } catch (error) {
+      console.error("Ошибка при обновлении оператора:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <>
+      <button onClick={() => setOpen(true)}>
+        <EditIcon />
+      </button>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              Редактирование оператора: <span className="text-gray-600">{name}</span>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <Input value={name} placeholder="Название" onChange={(e) => setName(e.target.value)} />
+            <Input value={pointIcon} placeholder="URL иконки" onChange={(e) => setIconUrl(e.target.value)} />
+            {/* Предпросмотр иконки */}
+            {pointIcon && 
+                <img 
+                    src={pointIcon} 
+                    alt="Иконка оператора" 
+                    className="w-30 h-30 rounded-full mx-auto" 
+            />}
+            <div className="flex items-center justify-end gap-3">
+              <Button variant="secondary" onClick={() => setOpen(false)}>
+                Отмена
+              </Button>
+              <Button onClick={handleUpdateOperator} disabled={loading}>
+                {loading ? "Обновление..." : "Обновить"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
