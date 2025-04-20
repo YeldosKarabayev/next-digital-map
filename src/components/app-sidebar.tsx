@@ -4,6 +4,7 @@ import * as React from "react"
 import {
   BookOpen,
   Bot,
+  Cable,
   Command,
   Frame,
   LifeBuoy,
@@ -221,6 +222,15 @@ export function AppSidebar({ setActiveTab, ...props }: AppSidebarProps) {
             >
               <MapPin className="mr-2" size={24} />
               Операторы
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton 
+              onClick={() => setActiveTab("addCable")}
+              
+            >
+              <Cable className="mr-2" size={24} />
+              Оптоволокнный кабель
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>

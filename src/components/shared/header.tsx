@@ -57,7 +57,7 @@ export const Header: React.FC<Props> = () => {
         </motion.div>
       )}
       <Container>
-        <div className="h-14 min-w-max bg-gray-800 rounded-lg">
+        <div className="h-14 min-w-max bg-gray-800 rounded-full">
           <div className="flex justify-between items-center h-full px-4">
             <div className="items-center flex justify-between">
               <Map size={30} color="white" />
