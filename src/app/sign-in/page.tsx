@@ -102,7 +102,7 @@ const SignIn = () => {
           </div>
 
           {/* Ошибка при авторизации */}
-          {error && <p className="text-red-500 text-sm text-center">{error.message}</p>}
+          {error && <p className="text-red-500 text-sm text-center">{error.message} Проверьте логин и пароль!</p>}
 
           <button
             type="submit"
