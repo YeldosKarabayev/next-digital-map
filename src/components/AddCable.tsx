@@ -1,59 +1,99 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { JSX, useEffect, useState } from 'react';
 import { YMaps, Map, Polyline } from '@pbe/react-yandex-maps';
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { addDoc, collection, doc, getDoc, getDocs, serverTimestamp } from 'firebase/firestore';
 import { db } from "@/lib/firebaseConfig";
 import { SketchPicker } from 'react-color';
 import { Button } from './ui/Button';
+import { ChevronLeft } from 'lucide-react';
 
-const operators = [
-    { id: 'beeline', name: 'Beeline' },
-    { id: 'tele2', name: 'Tele2' },
-    { id: 'kcell', name: 'Kcell' },
-];
+interface Provider {
+    id: string;
+    name: string;
+    color: string;
+}
 
-export default function AddCable() {
+interface CableForm {
+    onBack: () => void;
+}
+
+export default function AddCable({ onBack }: CableForm): JSX.Element {
+    const [providers, setProviders] = useState<Provider[]>([]);
     const [path, setPath] = useState<{ lat: number; lng: number }[]>([]);
     const [color, setColor] = useState('#ff0000');
-    const [operatorId, setOperatorId] = useState('beeline');
+    const [operatorId, setOperatorId] = useState('');
+    const [street, setStreet] = useState('');
     const [isPickerOpen, setIsPickerOpen] = useState(false);
+
+    useEffect(() => {
+        const fetchProviders = async () => {
+            const snapshot = await getDocs(collection(db, 'providers'));
+            const data = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            })) as Provider[];
+            setProviders(data);
+        };
+
+        fetchProviders();
+    }, []);
+
+    const handleProviderChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const selectedId = e.target.value;
+        setOperatorId(selectedId);
+
+        const selectedProvider = providers.find((p) => p.id === selectedId);
+        if (selectedProvider) {
+            setColor(selectedProvider.color);
+        }
+    };
 
     const handleMapClick = (e: any) => {
         const coords = e.get('coords');
-        setPath([...path, { lat: coords[0], lng: coords[1] }]);
+        setPath(prev => [...prev, { lat: coords[0], lng: coords[1] }]);
     };
 
     const saveCable = async () => {
+        if (!operatorId) return alert('Выберите провайдера');
+        if (!street.trim()) return alert('Введите название улицы');
         if (path.length < 2) return alert('Нужно минимум 2 точки');
+
         try {
-            await addDoc(collection(db, 'cables'), {
-                operatorId,
+            const providerRef = doc(db, 'providers', operatorId);
+            const cablesCollection = collection(providerRef, 'cables');
+
+            await addDoc(cablesCollection, {
+                street,
                 color,
-                path,
+                coordinates: path.map(p => ({
+                    lat: p.lat,
+                    lon: p.lng
+                })),
                 createdAt: serverTimestamp(),
             });
+
             alert('Кабель успешно добавлен');
             setPath([]);
+            setStreet('');
         } catch (e) {
             console.error(e);
-            alert('Ошибка при добавлении');
+            alert(`Ошибка при добавлении: ${e}`,);
         }
     };
 
     const undoLastPoint = () => {
-        setPath((prev) => prev.slice(0, -1));
+        setPath(prev => prev.slice(0, -1));
     };
 
     const clearAllPoints = () => {
         setPath([]);
     };
 
-    // 🔁 Удаление последней точки по ESC
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Escape') {
-                setPath((prev) => prev.slice(0, -1)); // удалить последнюю точку
+                undoLastPoint();
             }
         };
 
@@ -63,21 +103,36 @@ export default function AddCable() {
 
     return (
         <div className="p-4 flex flex-col gap-4">
-            <h2 className="text-xl font-semibold">Добавить линию кабеля</h2>
+            <div className='flex justify-start gap-6 mb-2 items-center'>
+                <Button onClick={onBack}>
+                    <ChevronLeft /> Назад
+                </Button>
+                <h2 className="text-xl font-semibold">Добавить линию кабеля</h2>
+            </div>
 
             <select
                 className="p-2 border rounded"
                 value={operatorId}
-                onChange={(e) => setOperatorId(e.target.value)}
+                onChange={handleProviderChange}
             >
-                {operators.map((op) => (
+                <option value="">Выберите провайдера</option>
+                {providers.map((op) => (
                     <option key={op.id} value={op.id}>{op.name}</option>
                 ))}
             </select>
 
+            <input
+                type="text"
+                placeholder="Название улицы"
+                value={street}
+                onChange={(e) => setStreet(e.target.value)}
+                className="p-2 border rounded"
+            />
+
             <div className="relative">
                 <Button
                     onClick={() => setIsPickerOpen(!isPickerOpen)}
+                    variant="secondary"
                 >
                     Выбрать цвет кабеля
                 </Button>
@@ -91,7 +146,7 @@ export default function AddCable() {
 
             <div className="h-[400px]">
                 <YMaps>
-                    <Map                         // 43.238949, 76.889709
+                    <Map
                         defaultState={{ center: [42.349170, 69.606002], zoom: 12 }}
                         width="100%"
                         height="100%"
@@ -124,15 +179,10 @@ export default function AddCable() {
             )}
 
             <div className="flex gap-2 flex-wrap">
-                <Button
-                    onClick={saveCable}
-                >
+                <Button onClick={saveCable}>
                     Сохранить
                 </Button>
-                <Button
-                    variant="secondary"
-                    onClick={clearAllPoints}
-                >
+                <Button variant="secondary" onClick={clearAllPoints}>
                     Очистить все точки
                 </Button>
             </div>

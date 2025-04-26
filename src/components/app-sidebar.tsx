@@ -230,7 +230,7 @@ export function AppSidebar({ setActiveTab, ...props }: AppSidebarProps) {
               
             >
               <Cable className="mr-2" size={24} />
-              Оптоволокнный кабель
+              Провайдеры
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
