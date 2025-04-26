@@ -75,65 +75,48 @@ export const YandexMapApi = ({ points }: MapComponentProps) => {
   const addPoints = (map: any) => {
     if (!map) return;
     map.geoObjects.removeAll(); // Очищаем метки перед добавлением новых
-
-    // points.forEach((point) => {
-
-    //   if (!point || point.lat === undefined || point.lon === undefined) return;
-
-    //   const placemark = new window.ymaps.Placemark(
-    //     [point.lon, point.lat],
-    //     {
-    //       hintContent: point.name,
-    //       balloonContent: `
-    //                 <div style="
-    //                     width: 200px; 
-    //                     height: 230px;
-    //                     text-align: center;
-    //                     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
-    //                     background-color: #ffffff;
-    //                     display: flex;
-    //                     flex-direction: column;
-    //                     align-items: center;">
-    //                     <h4 style="margin: 0 0 10px; font-size: 14px; color: #555;">
-    //                         Lon: ${point.lon} Lat: ${point.lat}
-    //                     </h4>
-    //                     <img src="${point.photoUrl || ''}" alt="Фото" 
-    //                         style="width: 90%; height: 70%; border-radius: 6px; margin-bottom: 10px;"/>
-    //                     <p style="margin: 0; font-size: 14px; color: #555;">
-    //                         ${point.name || 'Дополнительная информация не найдена.'}
-    //                     </p>
-    //                 </div>
-    //             `,
-    //     },
-    //     {
-    //       iconLayout: "default#image",
-    //       iconImageHref: point.pointIcon || "https://cdn-icons-png.flaticon.com/512/684/684908.png",
-    //       iconImageSize: [30, 30], // Размер иконки
-    //       iconImageOffset: [-24, -48], // Смещение, чтобы центрировать иконку
-    //       hideIconOnBalloonOpen: false,
-    //     }
-    //   );
-    //   map.geoObjects.add(placemark);
-    // })
-
-    // if (points.length > 0 && 
-    //     points.every((p) => p && typeof p.lat === "number" && typeof p.lon === "number")
-    //   ) {
-    //   map.setBounds(
-    //     points.map((p) => [p.lat, p.lon]),
-    //     { checkZoomRange: true, duration: 300 }
-    //   );
-    // }
-
-    setTimeout(() => {
-      map.container.fitToViewport();
-    }, 500);
+  
+    points.forEach((point) => {
+      if (!point || point.lat === undefined || point.lon === undefined) return;
+  
+      const placemark = new window.ymaps.Placemark(
+        [point.lon, point.lat],
+        {
+          hintContent: point.name,
+          balloonContent: `
+            <div style="
+                width: 200px; 
+                height: 230px;
+                text-align: center;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+                background-color: #ffffff;
+                display: flex;
+                flex-direction: column;
+                align-items: center;">
+                <h4 style="margin: 0 0 10px; font-size: 14px; color: #555;">
+                  Lon: ${point.lon}  Lat: ${point.lat} 
+                </h4>
+                <img src="${point.photoUrl || ''}" alt="Фото" 
+                    style="width: 90%; height: 70%; border-radius: 6px; margin-bottom: 10px;"/>
+                <p style="margin: 0; font-size: 14px; color: #555;">
+                    ${point.name || 'Дополнительная информация не найдена.'}
+                </p>
+            </div>
+        `,
+        },
+        {
+          iconLayout: "default#image",
+          iconImageHref: point.pointIcon || "https://cdn-icons-png.flaticon.com/512/684/684908.png",
+          iconImageSize: [100, 100],
+          iconImageOffset: [-24, -48],
+          hideIconOnBalloonOpen: false,
+        }
+      );
+  
+      map.geoObjects.add(placemark);
+    });
   };
+  
 
-  return (
-    <div className="w-full">
-      <div ref={mapRef} className="w-full min-h-[88vh] bg-gray-200 border border-gray-300 rounded-lg" />
-    </div>
-  )
-
+  return <div ref={mapRef} className="w-full min-h-[88vh] bg-gray-200 border border-gray-300 rounded-lg" />;
 };

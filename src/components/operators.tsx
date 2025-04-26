@@ -185,42 +185,42 @@ const OperatorsTable = () => {
                                             <TableCell>
                                                 <EditOperatorForm operatorId={operator.id} />
                                             </TableCell>
-                                            <TableCell>
+                                            <TableCell className="text-center">
                                                 <Dialog
                                                     open={openDialog === operator.id}
-                                                    onOpenChange={(isOpen) => !isOpen && setOpenDialog(null)}
                                                 >
                                                     <DialogTrigger asChild>
                                                         <Button
-                                                            variant={"outline"}
+                                                            variant="destructive"
                                                             onClick={() => setOpenDialog(operator.id)}
                                                         >
-                                                            <Trash2 />
+                                                            <Trash2 size={16} />
                                                         </Button>
                                                     </DialogTrigger>
                                                     <DialogContent>
                                                         <DialogHeader>
-                                                            <DialogTitle>Вы уверены что хотите удалить:
-                                                                <span className="text-lg text-blue-800 font-semibold"> {operator.name} </span>?
-                                                            </DialogTitle>
+                                                            <DialogTitle>Удалить оператора?</DialogTitle>
                                                             <DialogDescription>
-                                                                <div className="text-sm text-gray-800 flex justify-center space-x-4">
-                                                                    <Button
-                                                                        onClick={() => handleDeleteOperator(operator.id)}
-                                                                        variant={"outline"}
-                                                                        disabled={loading}
-                                                                    >
-                                                                        {loading ? "Удаление..." : "Да"}
-                                                                    </Button>
-                                                                    <Button
-                                                                        onClick={() => setOpenDialog(null)}
-                                                                        disabled={loading}
-                                                                    >
-                                                                        Нет
-                                                                    </Button>
-                                                                </div>
+                                                                Вы уверены что хотите удалить: <span className="text-lg text-blue-800 font-semibold">{operator.name} </span>?
                                                             </DialogDescription>
                                                         </DialogHeader>
+                                                        <div className="flex gap-4 justify-end mt-4">
+                                                            <Button
+                                                                onClick={() => setOpenDialog(null)}
+                                                                disabled={loading}
+                                                            >
+                                                                Отмена
+                                                            </Button>
+                                                            <Button
+                                                                variant="destructive"
+                                                                onClick={() => {
+                                                                    handleDeleteOperator(operator.id);
+                                                                    setOpenDialog(null);
+                                                                }}
+                                                            >
+                                                                Удалить
+                                                            </Button>
+                                                        </div>
                                                     </DialogContent>
                                                 </Dialog>
                                             </TableCell>

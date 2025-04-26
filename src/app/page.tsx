@@ -9,6 +9,7 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/lib/firebaseConfig"; 
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { MapWithControls } from "@/components/shared/MapWithControls";
 
 
 export default function Home() {
@@ -49,7 +50,8 @@ export default function Home() {
       <Header />
       <Container >
         <MapBlock>
-          <YandexMapApi />
+          <MapWithControls />
+          {/* <YandexMapApi points={[]} /> */}
           {/* <Dashboard /> */}
         </MapBlock>
       </Container>     

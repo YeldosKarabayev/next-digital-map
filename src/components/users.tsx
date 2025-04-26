@@ -176,38 +176,44 @@ const Users = () => {
                           {loading === user.id ? "Изменение..." : "См. роль"}
                         </Button>
                       </TableCell>
-                      <TableCell>
-
-                        <Dialog open={openDialog === user.id} onOpenChange={(isOpen) => !isOpen && setOpenDialog(null)}>
+                      <TableCell className="text-center">
+                        <Dialog
+                          open={openDialog === user.id}
+                        >
                           <DialogTrigger asChild>
-                            <Button variant={"outline"} disabled onClick={() => setOpenDialog(user.id)}>
-                              <Trash2 />
+                            <Button
+                              variant="destructive"
+                              onClick={() => setOpenDialog(user.id)}
+                            >
+                              <Trash2 size={16} />
                             </Button>
                           </DialogTrigger>
                           <DialogContent>
                             <DialogHeader>
-                              <DialogTitle>Вы уверены что хотите удалить: <span className="text-lg text-blue-800 font-semibold">{user.email} </span>?</DialogTitle>
+                              <DialogTitle>Удалить кабель?</DialogTitle>
                               <DialogDescription>
-                                <div className="text-sm text-gray-800 flex justify-center space-x-4">
-                                  <Button
-                                    onClick={() => handleDeleteUser(user.id)}
-                                    variant={"outline"}
-                                    disabled={isLoading}
-                                  >
-                                    {isLoading ? "Удаление..." : "Да"}
-                                  </Button>
-                                  <Button
-                                    onClick={() => setOpenDialog(null)}
-                                    disabled={isLoading}
-                                  >
-                                    Нет
-                                  </Button>
-                                </div>
+                                Вы уверены что хотите удалить: <span className="text-lg text-blue-800 font-semibold">{user.email} </span>?
                               </DialogDescription>
                             </DialogHeader>
+                            <div className="flex gap-4 justify-end mt-4">
+                              <Button
+                                onClick={() => setOpenDialog(null)}
+                                disabled={loading === user.id}
+                              >
+                                Отмена
+                              </Button>
+                              <Button
+                                variant="destructive"
+                                onClick={() => {
+                                  handleDeleteUser(user.id);
+                                  setOpenDialog(null);
+                                }}
+                              >
+                                Удалить
+                              </Button>
+                            </div>
                           </DialogContent>
                         </Dialog>
-
                       </TableCell>
                     </TableRow>
                   ))}

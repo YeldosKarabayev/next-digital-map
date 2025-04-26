@@ -89,11 +89,11 @@ export default function OperatorPointsForm({ operatorId, onBack, operatorName, o
 
     const handlePageChange = (page: number) => setCurrentPage(page);
     const handleNextPage = () => {
-        if(currentPage < totalPages) setCurrentPage(prev => prev + 1);
+        if (currentPage < totalPages) setCurrentPage(prev => prev + 1);
     };
 
     const handlePrevPage = () => {
-        if(currentPage > 1) setCurrentPage(prev => prev - 1);
+        if (currentPage > 1) setCurrentPage(prev => prev - 1);
     }
 
 
@@ -150,40 +150,42 @@ export default function OperatorPointsForm({ operatorId, onBack, operatorName, o
                                         <TableCell>
                                             <EditPountForm operatorId={operatorId} pointId={point.id} />
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell className="text-center">
                                             <Dialog
                                                 open={openDialog === point.id}
-                                                onOpenChange={(isOpen) => !isOpen && setOpenDialog(null)}
                                             >
                                                 <DialogTrigger asChild>
                                                     <Button
-                                                        variant={"outline"}
+                                                        variant="destructive"
                                                         onClick={() => setOpenDialog(point.id)}
                                                     >
-                                                        <Trash2 />
+                                                        <Trash2 size={16} />
                                                     </Button>
                                                 </DialogTrigger>
                                                 <DialogContent>
                                                     <DialogHeader>
-                                                        <DialogTitle>Вы уверены что хотите удалить: <span className="text-lg text-blue-800 font-semibold">{point.name} </span>?</DialogTitle>
+                                                        <DialogTitle>Удалить точку?</DialogTitle>
                                                         <DialogDescription>
-                                                            <div className="text-sm text-gray-800 flex justify-center space-x-4">
-                                                                <Button
-                                                                    onClick={() => handleDeletePoints(operatorId, point.id)}
-                                                                    variant={"outline"}
-                                                                    disabled={loading}
-                                                                >
-                                                                    {loading ? "Удаление..." : "Да"}
-                                                                </Button>
-                                                                <Button
-                                                                    onClick={() => setOpenDialog(null)}
-                                                                    disabled={loading}
-                                                                >
-                                                                    Нет
-                                                                </Button>
-                                                            </div>
+                                                            Вы уверены что хотите удалить: <span className="text-lg text-blue-800 font-semibold">{point.name} </span>?
                                                         </DialogDescription>
                                                     </DialogHeader>
+                                                    <div className="flex gap-4 justify-end mt-4">
+                                                        <Button
+                                                            onClick={() => setOpenDialog(null)}
+                                                            disabled={loading}
+                                                        >
+                                                            Отмена
+                                                        </Button>
+                                                        <Button
+                                                            variant="destructive"
+                                                            onClick={() => {
+                                                                handleDeletePoints(operatorId, point.id);
+                                                                setOpenDialog(null);
+                                                            }}
+                                                        >
+                                                            Удалить
+                                                        </Button>
+                                                    </div>
                                                 </DialogContent>
                                             </Dialog>
                                         </TableCell>
@@ -194,16 +196,16 @@ export default function OperatorPointsForm({ operatorId, onBack, operatorName, o
                     </Table>
 
                     <div className="flex justify-start items-center gap-2 mt-4">
-                        <button onClick={handlePrevPage} disabled = {currentPage === 1}><ChevronLeft/></button>
-                        {Array.from({ length: totalPages }, (_, i) => i + 1).map( page => (
-                            <button 
-                                key={page} 
-                                onClick={() => handlePageChange(page)} 
+                        <button onClick={handlePrevPage} disabled={currentPage === 1}><ChevronLeft /></button>
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                            <button
+                                key={page}
+                                onClick={() => handlePageChange(page)}
                                 className={currentPage === page ? "text-gray-700" : "hover:bg-gray-300 text-gray-400"}>
-                                    {page}
+                                {page}
                             </button>
                         ))}
-                        <button onClick={handleNextPage} disabled = {currentPage === totalPages}><ChevronRight/></button>
+                        <button onClick={handleNextPage} disabled={currentPage === totalPages}><ChevronRight /></button>
                     </div>
                 </>
             )}

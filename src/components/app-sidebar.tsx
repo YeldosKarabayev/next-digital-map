@@ -249,7 +249,7 @@ export function AppSidebar({ setActiveTab, ...props }: AppSidebarProps) {
       </SidebarContent>
       <SidebarFooter>
         {/* <NavUser user={data.user} /> */}
-        <div className="flex items-center mr-5 mb-8 space-x-2">
+        <div className="flex items-center mr-5 space-x-2">
           <CustomAvatar username={userData?.email || ""} userRole={userData?.role || ""} />
           <div className="flex flex-col items-start">
             <span className="text-black">{userData?.email}</span>

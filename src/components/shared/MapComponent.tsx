@@ -95,7 +95,7 @@ export const MapComponent = ({ points }: MapComponentProps) => {
                         flex-direction: column;
                         align-items: center;">
                         <h4 style="margin: 0 0 10px; font-size: 14px; color: #555;">
-                            Lon: ${point.lon} Lat: ${point.lat}
+                            Lon: ${point.lat} Lat: ${point.lon}
                         </h4>
                         <img src="${point.photoUrl || ''}" alt="Фото" 
                             style="width: 90%; height: 70%; border-radius: 6px; margin-bottom: 10px;"/>
@@ -120,7 +120,7 @@ export const MapComponent = ({ points }: MapComponentProps) => {
         points.every((p) => p && typeof p.lat === "number" && typeof p.lon === "number")
       ) {
       map.setBounds(
-        points.map((p) => [p.lat, p.lon]),
+        points.map((p) => [p.lon, p.lat]),
         { checkZoomRange: true, duration: 300 }
       );
     }
