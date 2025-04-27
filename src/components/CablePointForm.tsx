@@ -159,7 +159,9 @@ export default function CablePointForm({ providerId, onBack, name, color }: Prov
                                             </div>
                                         </TableCell>
                                         <TableCell className="text-center">
-                                            <Dialog open={openDialog === cable.id} onOpenChange={() => setOpenDialog(null)}>
+                                            <Dialog open={openDialog === cable.id} 
+                                                // onOpenChange={() => setOpenDialog(null)}
+                                            >
                                                 <DialogTrigger asChild>
                                                     <Button
                                                         variant="destructive"
@@ -172,7 +174,7 @@ export default function CablePointForm({ providerId, onBack, name, color }: Prov
                                                     <DialogHeader>
                                                         <DialogTitle>Удалить кабель?</DialogTitle>
                                                         <DialogDescription>
-                                                            Вы уверены, что хотите удалить:{" "}
+                                                            Вы уверены, что хотите удалить:
                                                             <span className="text-lg text-blue-800 font-semibold">{cable.street}</span>?
                                                         </DialogDescription>
                                                     </DialogHeader>
