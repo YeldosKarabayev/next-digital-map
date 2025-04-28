@@ -40,8 +40,8 @@ interface Cable {
 export const MapWithControls = () => {
   const [operators, setOperators] = useState<Operator[]>([]);
   const [providers, setProviders] = useState<Provider[]>([]);
-  const [selectedOperator, setSelectedOperator] = useState("");
-  const [selectedProvider, setSelectedProvider] = useState("");
+  const [selectedOperator, setSelectedOperator] = useState<string>("");
+  const [selectedProvider, setSelectedProvider] = useState<string>("");
   const [points, setPoints] = useState<Point[]>([]);
   const [cables, setCables] = useState<Cable[]>([]);
   const [loading, setLoading] = useState(true);
@@ -59,7 +59,7 @@ export const MapWithControls = () => {
         operatorsSnap.docs.map(async (docSnap) => {
           const operator = { id: docSnap.id, ...docSnap.data() } as Operator;
           const pointsSnap = await getDocs(collection(db, `operators/${docSnap.id}/points`));
-          const points = pointsSnap.docs.map(doc => ({
+          const points = pointsSnap.docs.map((doc) => ({
             id: doc.id,
             name: doc.data().name || "",
             lat: Number(doc.data().lat),
@@ -67,7 +67,7 @@ export const MapWithControls = () => {
             description: doc.data().description || "",
             photoUrl: doc.data().photoUrl || "",
             coordinates: [Number(doc.data().lat), Number(doc.data().lon)],
-          })) as Point[];
+          }));
           return { ...operator, points };
         })
       );
@@ -76,7 +76,7 @@ export const MapWithControls = () => {
         providersSnap.docs.map(async (docSnap) => {
           const provider = { id: docSnap.id, ...docSnap.data() } as Provider;
           const cablesSnap = await getDocs(collection(db, `providers/${docSnap.id}/cables`));
-          const cables = cablesSnap.docs.map(doc => {
+          const cables = cablesSnap.docs.map((doc) => {
             const coordinates = doc.data().coordinates || [];
             const path = Array.isArray(coordinates)
               ? coordinates.map((coord: { lat: number; lon: number }) => ({
@@ -84,7 +84,6 @@ export const MapWithControls = () => {
                   lon: Number(coord.lon),
                 }))
               : [];
-
             return {
               id: doc.id,
               name: doc.data().name || "",
@@ -107,30 +106,24 @@ export const MapWithControls = () => {
 
   useEffect(() => {
     if (selectedOperator === "all") {
-      // Выбрали "Все" — показываем все точки всех операторов
       const allPoints = operators.flatMap(op => op.points);
       setPoints(allPoints);
     } else if (selectedOperator) {
-      // Выбрали конкретного оператора
       const operator = operators.find(op => op.id === selectedOperator);
       setPoints(operator?.points || []);
     } else {
-      // Ничего не выбрано
       setPoints([]);
     }
   }, [selectedOperator, operators]);
 
   useEffect(() => {
     if (selectedProvider === "all") {
-      // Выбрали "Все" — показываем все кабели всех провайдеров
       const allCables = providers.flatMap(p => p.cables);
       setCables(allCables);
     } else if (selectedProvider) {
-      // Выбрали конкретного провайдера
       const provider = providers.find(p => p.id === selectedProvider);
       setCables(provider?.cables || []);
     } else {
-      // Ничего не выбрано
       setCables([]);
     }
   }, [selectedProvider, providers]);
@@ -141,7 +134,7 @@ export const MapWithControls = () => {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="p-3 rounded-xl bg-slate-800 flex gap-4 items-center">
+      <div className="p-3 rounded-xl bg-slate-800 flex gap-4 items-center flex-wrap">
         {/* Фильтр операторов */}
         <div className="flex gap-2 items-center">
           <label htmlFor="operator-select" className="text-white">Фильтр операторов:</label>
@@ -179,18 +172,24 @@ export const MapWithControls = () => {
 
       {/* Карта */}
       <YandexMapApi
-        points={points.map(point => ({
-          ...point,
-          pointIcon: operators.find(op => op.id === selectedOperator)?.pointIcon || "default-icon.png",
-          photoUrl: point.photoUrl || "",
-        }))}
-        cables={cables.map(cable => ({
-          ...cable,
-          path: cable.path,
-          color: cable.color || "default-color",
-          companyName: providers.find(provider => provider.cables.some(c => c.id === cable.id))?.name || "Unknown Company",
-          streetName: cable.street || "Unknown Street",
-        }))}
+        points={points.map(point => {
+          const operator = operators.find(op => op.points.some(p => p.id === point.id));
+          return {
+            ...point,
+            pointIcon: operator?.pointIcon || "default-icon.png",
+            photoUrl: point.photoUrl || "",
+          };
+        })}
+        cables={cables.map(cable => {
+          const provider = providers.find(prov => prov.cables.some(c => c.id === cable.id));
+          return {
+            ...cable,
+            path: cable.path,
+            color: cable.color || "default-color",
+            companyName: provider?.name || "Unknown Company",
+            streetName: cable.street || "Unknown Street",
+          };
+        })}
       />
     </div>
   );
