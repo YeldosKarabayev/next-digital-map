@@ -126,6 +126,11 @@ export default function CablePointForm({ providerId, onBack, name, color }: Prov
                         </div>
                     </div>
 
+                    {loading ? (
+                    <Toast message="Загрузка..." onClose={() => { }} />
+                    ) : (
+                    <>
+
                     <Table>
                         <TableHeader>
                             <TableRow>
@@ -140,7 +145,7 @@ export default function CablePointForm({ providerId, onBack, name, color }: Prov
                             {cables.length === 0 ? (
                                 <TableRow>
                                     <TableCell colSpan={5} className="text-center">
-                                        <Toast message="Кабели не найдены" onClose={() => { }} />
+                                        Данные не найдены
                                     </TableCell>
                                 </TableRow>
                             ) : (
@@ -201,6 +206,8 @@ export default function CablePointForm({ providerId, onBack, name, color }: Prov
                             )}
                         </TableBody>
                     </Table>
+                    </>
+                    )}
                 </motion.div>
             )}
         </>
