@@ -34,6 +34,7 @@ export const AddOperatorDialog = ({ open, onClose }: AddOperatorDialogProps) => 
       setName("");
       setPointIcon;
       onClose();
+      alert("Оператор успешно добавлен!"); // Уведомление об успешном добавлении
     } catch (error) {
       console.error("Ошибка добавления оператора:", error);
     } finally {

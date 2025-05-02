@@ -46,6 +46,10 @@ const AddUserForm = ({ onUserAdded }: { onUserAdded: () => void }) => {
       } else {
         console.error("Ошибка при добавлении пользователя");
       }
+
+      setOpen(false); // Закрываем модалку
+      alert("Пользователь успешно добавлен!");
+      
     } catch (error) {
       console.error("Ошибка запроса:", error);
     } finally {

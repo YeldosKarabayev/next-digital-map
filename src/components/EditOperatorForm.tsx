@@ -47,8 +47,9 @@ export default function EditOperatorForm({ operatorId }: EditOperatorFormProps) 
         pointIcon, // Используем правильное название поля
       });
 
-      //onUpdate(); // Обновляем список операторов
       setOpen(false); // Закрываем модалку
+      alert("Оператор успешно обновлен!"); // Уведомление об успешном обновлении
+    
     } catch (error) {
       console.error("Ошибка при обновлении оператора:", error);
     } finally {

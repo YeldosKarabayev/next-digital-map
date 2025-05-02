@@ -22,6 +22,8 @@ import React from "react";
 import { AddOperatorDialog } from "./shared/AddOperatorForm";
 import { AddProvider } from "./shared/AddProviderForm";
 import CablePointForm from "./CablePointForm";
+import EditProviderForm from "./EditProvider";
+import { ProviderId } from "firebase/auth";
 
 
 const ProviderTable = () => {
@@ -136,13 +138,14 @@ const ProviderTable = () => {
                                     <TableHead className="text-center">Название</TableHead>
                                     <TableHead className="text-center">Количество улиц</TableHead>
                                     <TableHead className="text-center">Цвет</TableHead>
+                                    <TableHead className="text-center">Редактировать</TableHead>
                                     <TableHead className="text-center">Действие</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {loading ? (
                                     <TableRow>
-                                        <TableCell colSpan={5} className="text-center">
+                                        <TableCell colSpan={6} className="text-center">
                                             <Toast message="Пожалуйста, подождите" onClose={() => { }} />
                                         </TableCell>
                                     </TableRow>
@@ -169,6 +172,12 @@ const ProviderTable = () => {
                                                         {provider.color}
                                                     </div>
                                                 </TableCell>
+
+                                                <TableCell className="text-center">
+                                                    <EditProviderForm providerId={provider.id} />
+                                                </TableCell>
+
+
                                                 <TableCell className="text-center">
                                                     <Dialog
                                                         open={openDialog === provider.id}
