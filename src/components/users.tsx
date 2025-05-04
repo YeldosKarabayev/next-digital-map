@@ -162,20 +162,20 @@ const Users = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>№</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Роль</TableHead>
-                      <TableHead>Действие</TableHead>
-                      <TableHead>#</TableHead>
+                      <TableHead className="text-center">№</TableHead>
+                      <TableHead className="text-center">Email</TableHead>
+                      <TableHead className="text-center">Роль</TableHead>
+                      <TableHead className="text-center">Действие</TableHead>
+                      <TableHead className="text-center">#</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {users.map((user, index) => (
                       <TableRow key={user.id}>
-                        <TableCell>{index + 1}</TableCell>
-                        <TableCell>{user.email}</TableCell>
-                        <TableCell>{user.role}</TableCell>
-                        <TableCell>
+                        <TableCell className="text-center">{index + 1}</TableCell>
+                        <TableCell className="text-center">{user.email}</TableCell>
+                        <TableCell className="text-center">{user.role}</TableCell>
+                        <TableCell className="text-center">
                           <Button
                             onClick={() => handleRoleChange(user.id, user.role)}
                             disabled={loading === user.id}

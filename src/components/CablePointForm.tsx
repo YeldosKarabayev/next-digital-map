@@ -34,6 +34,9 @@ export default function CablePointForm({ providerId, onBack, name, color }: Prov
     const [openDialog, setOpenDialog] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState(false);
 
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
+
     const fetchCables = async (signal?: AbortSignal) => {
         try {
             setLoading(true);
@@ -74,6 +77,22 @@ export default function CablePointForm({ providerId, onBack, name, color }: Prov
 
         return () => controller.abort();
     }, []);
+
+    // Пагинация для табличной части *********************************
+
+    const totalPages = Math.ceil(cables.length / itemsPerPage);
+    const paginatedPoints = cables.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+    // Переключение страниц
+
+    const handlePageChange = (page: number) => setCurrentPage(page);
+    const handleNextPage = () => {
+        if (currentPage < totalPages) setCurrentPage(prev => prev + 1);
+    };
+
+    const handlePrevPage = () => {
+        if (currentPage > 1) setCurrentPage(prev => prev - 1);
+    }
 
     return (
         <>
@@ -127,86 +146,100 @@ export default function CablePointForm({ providerId, onBack, name, color }: Prov
                     </div>
 
                     {loading ? (
-                    <Toast message="Загрузка..." onClose={() => { }} />
+                        <Toast message="Загрузка..." onClose={() => { }} />
                     ) : (
-                    <>
+                        <>
 
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>№</TableHead>
-                                <TableHead className="text-center">Компания</TableHead>
-                                <TableHead className="text-center">Улица</TableHead>
-                                <TableHead className="text-center">Цвет</TableHead>
-                                <TableHead className="text-center">Действия</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {cables.length === 0 ? (
-                                <TableRow>
-                                    <TableCell colSpan={5} className="text-center">
-                                        Данные не найдены
-                                    </TableCell>
-                                </TableRow>
-                            ) : (
-                                cables.map((cable, index) => (
-                                    <TableRow key={cable.id}>
-                                        <TableCell>{index + 1}</TableCell>
-                                        <TableCell className="text-center">{name}</TableCell>
-                                        <TableCell className="text-center">{cable.street}</TableCell>
-                                        <TableCell className="text-center">
-                                            <div className="flex items-center justify-center gap-2">
-                                                <div
-                                                    className="w-4 h-4 rounded-full"
-                                                    style={{ backgroundColor: cable.color }}
-                                                />
-                                                {cable.color}
-                                            </div>
-                                        </TableCell>
-                                        <TableCell className="text-center">
-                                            <Dialog open={openDialog === cable.id} 
-                                                // onOpenChange={() => setOpenDialog(null)}
-                                            >
-                                                <DialogTrigger asChild>
-                                                    <Button
-                                                        variant="destructive"
-                                                        onClick={() => setOpenDialog(cable.id)}
-                                                    >
-                                                        <Trash2 size={16} />
-                                                    </Button>
-                                                </DialogTrigger>
-                                                <DialogContent>
-                                                    <DialogHeader>
-                                                        <DialogTitle>Удалить кабель?</DialogTitle>
-                                                        <DialogDescription>
-                                                            Вы уверены, что хотите удалить:
-                                                            <span className="text-lg text-blue-800 font-semibold">{cable.street}</span>?
-                                                        </DialogDescription>
-                                                    </DialogHeader>
-                                                    <div className="flex gap-4 justify-end mt-4">
-                                                        <Button
-                                                            onClick={() => setOpenDialog(null)}
-                                                            disabled={loading}
-                                                        >
-                                                            Отмена
-                                                        </Button>
-                                                        <Button
-                                                            variant="destructive"
-                                                            onClick={() => handleDelete(cable.id)}
-                                                            disabled={loading}
-                                                        >
-                                                            Удалить
-                                                        </Button>
-                                                    </div>
-                                                </DialogContent>
-                                            </Dialog>
-                                        </TableCell>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>№</TableHead>
+                                        <TableHead className="text-center">Компания</TableHead>
+                                        <TableHead className="text-center">Улица</TableHead>
+                                        <TableHead className="text-center">Цвет</TableHead>
+                                        <TableHead className="text-center">Действия</TableHead>
                                     </TableRow>
-                                ))
-                            )}
-                        </TableBody>
-                    </Table>
-                    </>
+                                </TableHeader>
+                                <TableBody>
+                                    {cables.length === 0 ? (
+                                        <TableRow>
+                                            <TableCell colSpan={5} className="text-center">
+                                                Данные не найдены
+                                            </TableCell>
+                                        </TableRow>
+                                    ) : (
+                                        paginatedPoints.map((cable, index) => (
+                                            <TableRow key={cable.id}>
+                                                <TableCell>{(currentPage - 1) * itemsPerPage + index + 1}</TableCell>
+                                                <TableCell className="text-center">{name}</TableCell>
+                                                <TableCell className="text-center">{cable.street}</TableCell>
+                                                <TableCell className="text-center">
+                                                    <div className="flex items-center justify-center gap-2">
+                                                        <div
+                                                            className="w-4 h-4 rounded-full"
+                                                            style={{ backgroundColor: cable.color }}
+                                                        />
+                                                        {cable.color}
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell className="text-center">
+                                                    <Dialog open={openDialog === cable.id}
+                                                    // onOpenChange={() => setOpenDialog(null)}
+                                                    >
+                                                        <DialogTrigger asChild>
+                                                            <Button
+                                                                variant="destructive"
+                                                                onClick={() => setOpenDialog(cable.id)}
+                                                            >
+                                                                <Trash2 size={16} />
+                                                            </Button>
+                                                        </DialogTrigger>
+                                                        <DialogContent>
+                                                            <DialogHeader>
+                                                                <DialogTitle>Удалить кабель?</DialogTitle>
+                                                                <DialogDescription>
+                                                                    Вы уверены, что хотите удалить:
+                                                                    <span className="text-lg text-blue-800 font-semibold">{cable.street}</span>?
+                                                                </DialogDescription>
+                                                            </DialogHeader>
+                                                            <div className="flex gap-4 justify-end mt-4">
+                                                                <Button
+                                                                    onClick={() => setOpenDialog(null)}
+                                                                    disabled={loading}
+                                                                >
+                                                                    Отмена
+                                                                </Button>
+                                                                <Button
+                                                                    variant="destructive"
+                                                                    onClick={() => handleDelete(cable.id)}
+                                                                    disabled={loading}
+                                                                >
+                                                                    Удалить
+                                                                </Button>
+                                                            </div>
+                                                        </DialogContent>
+                                                    </Dialog>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))
+                                    )}
+                                </TableBody>
+                            </Table>
+
+                            <div className="flex justify-start items-center gap-2 mt-4">
+                                <button onClick={handlePrevPage} disabled={currentPage === 1}><ChevronLeft /></button>
+                                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                                    <button
+                                        key={page}
+                                        onClick={() => handlePageChange(page)}
+                                        className={currentPage === page ? "text-gray-700" : "hover:bg-gray-300 text-gray-400"}>
+                                        {page}
+                                    </button>
+                                ))}
+                                <button onClick={handleNextPage} disabled={currentPage === totalPages}><ChevronRight /></button>
+                            </div>
+
+                        </>
                     )}
                 </motion.div>
             )}

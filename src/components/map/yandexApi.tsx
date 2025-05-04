@@ -147,7 +147,7 @@ export const YandexMapApi = ({ points, cables }: MapComponentProps) => {
       },
       {
         strokeColor: cable.color || "#0000FF", // Цвет линии
-        strokeWidth: 5,
+        strokeWidth: 2.5,
         strokeOpacity: 0.8,
       }
     );
