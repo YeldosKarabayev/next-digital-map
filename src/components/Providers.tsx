@@ -86,6 +86,7 @@ const ProviderTable = () => {
         fetachProviders();
     }, [fetachProviders]);
 
+    console.log("Количество улиц:", providers.map((provider) => provider.cables?.length || 0));
 
     return (
 

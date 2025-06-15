@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Map Service | Сервис карт Операторов",
+  title: "Digital maps | Сервис карты операторов и провайдеров",
 };
 
 export default function RootLayout({

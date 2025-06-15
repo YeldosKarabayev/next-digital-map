@@ -1,0 +1,74 @@
+[
+    {
+        "id": "wERouOmwn2YuOsLureIv",
+        "name": "Beeline АМС",
+        "pointIcon": "https://i125.fastpic.org/big/2025/0427/47/3e7d11f1a7c020c54dfbe3c0e8c08e47.png",
+        "createdAt": "2025-04-27T17:47:13.236Z",
+        "points": [
+            {
+                "id": "5oEMw0Tp8X2sBoQTsfFr",
+                "name": "Ә. Сәрсенбаев көшесі",
+                "description": "Ә. Сәрсенбаев көшесі",
+                "lat": 69.416328,
+                "lon": 42.366571,
+                "photoUrl": "123"
+            },
+            {
+                "id": "Akjd1c1S92ELZPnHB4PJ",
+                "name": "микрорайон Шапагат",
+                "description": "микрорайон Шапагат",
+                "lat": 69.645775,
+                "lon": 42.34798,
+                "photoUrl": "123"
+            },
+            {
+                "id": "PRPnilQelIXliaGZszS0",
+                "name": "улица Аширбек Сыгай",
+                "description": "улица Аширбек Сыгай",
+                "lat": 69.645866,
+                "lon": 42.390677,
+                "photoUrl": "123"
+            },
+            {
+                "id": "XqwldX7rghsyjbjQQH0O",
+                "name": "Балқан көшесі",
+                "description": "Балқан көшесі",
+                "lat": 69.782885,
+                "lon": 42.285148,
+                "photoUrl": "123"
+            },
+            {
+                "id": "ZsGI03PxdqCyjcHMNBHD",
+                "name": "улица Байынкол",
+                "description": "улица Байынкол",
+                "lat": 69.627865,
+                "lon": 42.388057,
+                "photoUrl": "123"
+            },
+            {
+                "id": "eq3bzmJ9bDnqUn0MUJA8",
+                "name": "жилой массив Сайрам",
+                "description": "жилой массив Сайрам",
+                "lat": 69.784821,
+                "lon": 42.310669,
+                "photoUrl": "123"
+            },
+            {
+                "id": "h3moiZLKfyl4B3BSOtc2",
+                "name": "Үлкен жар көшесі",
+                "description": "Үлкен жар көшесі",
+                "lat": 69.593917,
+                "lon": 42.40175,
+                "photoUrl": "123"
+            },
+            {
+                "id": "hkRR00Vb1GDp7Tlm0Mnw",
+                "name": "квартал Абдилабад",
+                "description": "квартал Абдилабад",
+                "lat": 69.829028,
+                "lon": 42.266861,
+                "photoUrl": "123"
+            }
+        ]
+    }
+]

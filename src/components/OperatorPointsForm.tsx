@@ -70,7 +70,10 @@ export default function OperatorPointsForm({ operatorId, onBack, operatorName, o
 
         setLoading(true);
         try {
-            await deleteDoc(doc(db, `operators/${operatorId}/points`, pointId));
+            await fetch(`/api/admin/operators/points/deletepoints/${pointId}`, {
+                method: "DELETE",
+            })
+
             setPoints(prevPoints => prevPoints.filter(point => point.id !== pointId));
             console.log("Точка удалена");
         } catch (error) {
@@ -109,7 +112,8 @@ export default function OperatorPointsForm({ operatorId, onBack, operatorName, o
             <div className="p-1">
                 <div className="flex items-center gap-8 mb-6">
                     <Button onClick={onBack}>
-                        <ChevronLeft /> Назад
+                        <ChevronLeft /> 
+                        {/* Назад */}
                     </Button>
                     <button onClick={fetchPoints} className="flex items-center gap-2 rounded-md p-1 border-2 border-gray-900">
                         <motion.div

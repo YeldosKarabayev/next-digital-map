@@ -25,16 +25,21 @@ export const AddOperatorDialog = ({ open, onClose }: AddOperatorDialogProps) => 
     setLoading(true);
 
     try {
-      await addDoc(collection(db, "operators"), { 
-        name,
-        pointIcon,
-        createdAt: new Date().toISOString(), 
+      const res = await fetch("/api/admin/operators/add", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, pointIcon }),
       });
 
-      setName("");
-      setPointIcon;
-      onClose();
+      if(!res.ok){
+        const data = await res.json();
+        throw new Error(data.error || "Failed to create operator");
+      }
+
+      const data = await res.json();
+
       alert("Оператор успешно добавлен!"); // Уведомление об успешном добавлении
+      
     } catch (error) {
       console.error("Ошибка добавления оператора:", error);
     } finally {

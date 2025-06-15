@@ -94,6 +94,9 @@ export default function CablePointForm({ providerId, onBack, name, color }: Prov
         if (currentPage > 1) setCurrentPage(prev => prev - 1);
     }
 
+
+    console.log("Количество кабелей", cables.length);
+
     return (
         <>
             {activeTab ? (
@@ -117,7 +120,8 @@ export default function CablePointForm({ providerId, onBack, name, color }: Prov
                     <div className="grid items-center mb-6">
                         <div className="flex items-center gap-8 mb-6">
                             <Button onClick={onBack}>
-                                <ChevronLeft /> Назад
+                                <ChevronLeft /> 
+                                {/* Назад */}
                             </Button>
                             <button
                                 onClick={() => fetchCables()}

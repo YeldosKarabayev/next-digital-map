@@ -94,7 +94,14 @@ const OperatorsTable = () => {
 
     const handleDeleteOperator = async (operatorId: string) => {
         try {
-            await deleteDoc(doc(db, "operators", operatorId));
+            const res = await fetch(`/api/admin/operators/delete/${operatorId}`, {
+                method: "DELETE",
+            });
+
+            if(!res.ok) {
+                throw new Error("Ошибка при удалении оператора");
+            }
+
             console.log("Оператор успешно удален!");
             setOperators(operators.filter(op => op.id !== operatorId));
         } catch (error) {

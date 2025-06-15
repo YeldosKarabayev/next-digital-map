@@ -49,56 +49,59 @@ export const MapWithControls = () => {
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
+      try {
+        const [operatorsRes, providersRes] = await Promise.all([
+          fetch("/api/admin/operators/operator"),
+          fetch("/api/admin/providers"),
+        ]);
 
-      const [operatorsSnap, providersSnap] = await Promise.all([
-        getDocs(collection(db, "operators")),
-        getDocs(collection(db, "providers")),
-      ]);
+        const [operatorsJson, providersJson] = await Promise.all([
+          operatorsRes.json(),
+          providersRes.json(),
+        ]);
 
-      const operatorsWithPoints = await Promise.all(
-        operatorsSnap.docs.map(async (docSnap) => {
-          const operator = { id: docSnap.id, ...docSnap.data() } as Operator;
-          const pointsSnap = await getDocs(collection(db, `operators/${docSnap.id}/points`));
-          const points = pointsSnap.docs.map((doc) => ({
-            id: doc.id,
-            name: doc.data().name || "",
-            lat: Number(doc.data().lat),
-            lon: Number(doc.data().lon),
-            description: doc.data().description || "",
-            photoUrl: doc.data().photoUrl || "",
-            coordinates: [Number(doc.data().lat), Number(doc.data().lon)],
-          }));
-          return { ...operator, points };
-        })
-      );
+        const operators = operatorsJson.map((operator: any) => ({
+          id: operator.id,
+          name: operator.name,
+          pointIcon: operator.pointIcon,
+          points: operator.points.map((point: any) => ({
+            id: point.id,
+            name: point.name || "",
+            lat: point.lat,
+            lon: point.lon,
+            description: point.description || "",
+            photoUrl: point.photoUrl || "",
+            coordinates: [point.lat, point.lon],
+          })),
+        }));
 
-      const providersWithCables = await Promise.all(
-        providersSnap.docs.map(async (docSnap) => {
-          const provider = { id: docSnap.id, ...docSnap.data() } as Provider;
-          const cablesSnap = await getDocs(collection(db, `providers/${docSnap.id}/cables`));
-          const cables = cablesSnap.docs.map((doc) => {
-            const coordinates = doc.data().coordinates || [];
-            const path = Array.isArray(coordinates)
-              ? coordinates.map((coord: { lat: number; lon: number }) => ({
-                  lat: Number(coord.lat),
-                  lon: Number(coord.lon),
+        const providers = providersJson.map((provider: any) => ({
+          id: provider.id,
+          name: provider.name,
+          color: provider.color,
+          cables: Array.isArray(provider.cables)
+            ? provider.cables.map((cable: any) => ({
+              id: cable.id,
+              street: cable.street,
+              color: cable.color,
+              path: Array.isArray(cable.coordinates)
+                ? cable.coordinates.map((coord: any) => ({
+                  lat: coord.lat,
+                  lon: coord.lon,
                 }))
-              : [];
-            return {
-              id: doc.id,
-              name: doc.data().name || "",
-              color: doc.data().color || "",
-              street: doc.data().street || "",
-              path,
-            };
-          });
-          return { ...provider, cables };
-        })
-      );
+                : [],
+            }))
+            : [],
+        }));
 
-      setOperators(operatorsWithPoints);
-      setProviders(providersWithCables);
-      setLoading(false);
+        setOperators(operators);
+        setProviders(providers);
+      } catch (error) {
+        console.error("Ошибка при загрузке данных:", error);
+        alert("Ошибка загрузки данных");
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchData();

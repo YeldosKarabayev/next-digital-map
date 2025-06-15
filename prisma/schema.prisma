@@ -19,3 +19,48 @@ model User {
   password String
   name     String?
 }
+
+
+model Provider {
+  id        String   @id
+  name      String
+  color     String
+  createdAt DateTime @default(now())
+  cables    Cable[]
+}
+
+model Cable {
+  id         String     @id
+  street     String
+  color      String
+  createdAt  DateTime
+  provider   Provider   @relation(fields: [providerId], references: [id])
+  providerId String
+  coordinates CableCoordinate[]
+}
+
+model CableCoordinate {
+  id       Int     @id @default(autoincrement())
+  lat      Float
+  lon      Float
+  cable    Cable   @relation(fields: [cableId], references: [id])
+  cableId  String
+}
+
+model Operator {
+  id        String  @id
+  name      String
+  pointIcon String
+  points    Point[]
+}
+
+model Point {
+  id          String   @id
+  name        String
+  description String
+  lat         Float
+  lon         Float
+  photoUrl    String
+  operator    Operator @relation(fields: [operatorId], references: [id], onDelete: Cascade)
+  operatorId  String
+}

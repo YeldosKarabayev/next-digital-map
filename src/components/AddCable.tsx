@@ -32,12 +32,11 @@ export default function AddCable({ onBack }: CableForm): JSX.Element {
 
     useEffect(() => {
         const fetchProviders = async () => {
-            const snapshot = await getDocs(collection(db, 'providers'));
-            const data = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            })) as Provider[];
-            setProviders(data);
+            const res = await fetch("/api/admin/providers");
+            if(res.ok){
+                const data = await res.json();
+                setProviders(data);
+            }
         };
 
         fetchProviders();
@@ -67,19 +66,39 @@ export default function AddCable({ onBack }: CableForm): JSX.Element {
         if (!street.trim()) return alert('Введите название улицы');
         if (path.length < 2) return alert('Нужно минимум 2 точки');
 
-        try {
-            const providerRef = doc(db, 'providers', operatorId);
-            const cablesCollection = collection(providerRef, 'cables');
+        setLoading(true);
 
-            await addDoc(cablesCollection, {
-                street,
-                color,
-                coordinates: path.map(p => ({
-                    lat: p.lat,
-                    lon: p.lng
-                })),
-                createdAt: serverTimestamp(),
+        try {
+            // const providerRef = doc(db, 'providers', operatorId);
+            // const cablesCollection = collection(providerRef, 'cables');
+
+            // await addDoc(cablesCollection, {
+            //     street,
+            //     color,
+            //     coordinates: path.map(p => ({
+            //         lat: p.lat,
+            //         lon: p.lng
+            //     })),
+            //     createdAt: serverTimestamp(),
+            // });
+
+            const res = await fetch('/api/admin/providers/cables/addCable', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    operatorId,
+                    street,
+                    color,
+                    path,
+                }),
             });
+
+            if(!res.ok){
+                throw new Error('Ошибка при добавлении');
+            }
+
 
             alert('Кабель успешно добавлен');
             setPath([]);
@@ -87,6 +106,8 @@ export default function AddCable({ onBack }: CableForm): JSX.Element {
         } catch (e) {
             console.error(e);
             alert(`Ошибка при добавлении: ${e}`,);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -118,11 +139,12 @@ export default function AddCable({ onBack }: CableForm): JSX.Element {
             className="p-1"
         >
             <div className="p-1 flex flex-col gap-4">
-                <div className='grid justify-start gap-6 mb-2 items-center'>
-                    <h2 className="text-xl font-semibold">Добавить линию кабеля</h2>
-                    <Button className='w-[40%]' onClick={onBack}>
-                        <ChevronLeft /> Назад
+                <div className='flex justify-start gap-6 mb-2 items-center'>
+                    <Button  onClick={onBack}>
+                        <ChevronLeft /> 
+                        {/* Назад */}
                     </Button>
+                    <h2 className="text-xl font-semibold">Добавить линию кабеля</h2>
                 </div>
 
                 <select
