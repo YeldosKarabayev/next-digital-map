@@ -1,14 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { getDocs, collection, doc } from 'firebase/firestore';
-import { db } from "@/lib/firebaseConfig";
-
-declare global {
-  interface Window {
-    ymaps: any;
-  }
-}
 
 interface OperatorPoint {
   lon: number;
@@ -76,35 +68,29 @@ export const YandexMapApi = ({ points, cables }: MapComponentProps) => {
   };
 
   const renderMapObjects = (map: any) => {
-    if (!map) return;
+    if (!map || !window.ymaps) return;
+
     map.geoObjects.removeAll();
 
-    // Сначала добавляем точки операторов
-    points.forEach((point) => {
-      if (!point || point.lat === undefined || point.lon === undefined) return;
+    // Создаем кластеризатор
+    const clusterer = new window.ymaps.Clusterer({
+      preset: 'islands#invertedBlueClusterIcons',
+      groupByCoordinates: false,
+      clusterDisableClickZoom: false,
+      clusterOpenBalloonOnClick: true,
+    });
 
-      const placemark = new window.ymaps.Placemark(
+    // Создаем метки для точек
+    const placemarks = points.map((point) => {
+      return new window.ymaps.Placemark(
         [point.lon, point.lat],
         {
           hintContent: point.name,
           balloonContent: `
-            <div style="
-                width: 200px; 
-                height: 230px;
-                text-align: center;
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
-                background-color: #ffffff;
-                display: flex;
-                flex-direction: column;
-                align-items: center;">
-                <h4 style="margin: 0 0 10px; font-size: 14px; color: #555;">
-                  Lon: ${point.lon}  Lat: ${point.lat}
-                </h4>
-                <img src="${point.photoUrl || ''}" alt="Фото" 
-                    style="width: 90%; height: 70%; border-radius: 6px; margin-bottom: 10px;"/>
-                <p style="margin: 0; font-size: 14px; color: #555;">
-                    ${point.name || 'Дополнительная информация не найдена.'}
-                </p>
+            <div style="width: 200px; height: 230px; text-align: center; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); background-color: #ffffff; display: flex; flex-direction: column; align-items: center;">
+              <h4 style="margin: 0 0 10px; font-size: 14px; color: #555;">Lon: ${point.lon}  Lat: ${point.lat}</h4>
+              <img src="${point.photoUrl || ''}" alt="Фото" style="width: 90%; height: 70%; border-radius: 6px; margin-bottom: 10px;"/>
+              <p style="margin: 0; font-size: 14px; color: #555;">${point.name || 'Дополнительная информация не найдена.'}</p>
             </div>
           `,
         },
@@ -112,53 +98,38 @@ export const YandexMapApi = ({ points, cables }: MapComponentProps) => {
           iconLayout: "default#image",
           iconImageHref: point.pointIcon || "https://cdn-icons-png.flaticon.com/512/684/684908.png",
           iconImageSize: [100, 100],
-          iconImageOffset: [-24, -48],
+          iconImageOffset: [-48, -24],
           hideIconOnBalloonOpen: false,
         }
       );
-
-      map.geoObjects.add(placemark);
     });
 
+    // Добавляем точки в кластеризатор
+    clusterer.add(placemarks);
 
-    const providerCables = cables || [];
+    // Добавляем кластеризатор на карту
+    map.geoObjects.add(clusterer);
 
-    console.log("Кабели", cables);
+    // Добавляем линии кабелей
+    cables.forEach((cable) => {
+      if (!cable.path || cable.path.length < 2) return;
 
-    // Добавляем кабели провайдеров
-  cables.forEach((cable) => {
-    // Логируем данные кабеля
-    console.log('Кабель:', cable);
+      const polyline = new window.ymaps.Polyline(
+        cable.path.map(coord => [coord.lat, coord.lon]),
+        {
+          hintContent: `${cable.companyName} - ${cable.street}`,
+          balloonContent: `<strong>${cable.companyName}</strong><br/>${cable.street}`,
+        },
+        {
+          strokeColor: cable.color || "#0000FF",
+          strokeWidth: 2.5,
+          strokeOpacity: 0.8,
+        }
+      );
 
-    // Если путь пуст, пропускаем этот кабель
-    if (!cable.path || cable.path.length < 2) {
-      console.warn(`Кабель ${cable.companyName} не имеет достаточно координат для отображения.`);
-      return;
-    }
-
-    // Логируем массив координат
-    console.log('Координаты кабеля:', cable.path);
-
-    const polyline = new window.ymaps.Polyline(
-      cable.path.map(coord => [coord.lat, coord.lon]), // Преобразуем координаты
-      {
-        hintContent: `${cable.companyName} - ${cable.street}`,
-        balloonContent: `<strong>${cable.companyName}</strong><br/>${cable.street}`,
-      },
-      {
-        strokeColor: cable.color || "#0000FF", // Цвет линии
-        strokeWidth: 2.5,
-        strokeOpacity: 0.8,
-      }
-    );
-
-    // Добавляем полилинию на карту
-    map.geoObjects.add(polyline);
-  });
-
-
-  }
-
+      map.geoObjects.add(polyline);
+    });
+  };
 
   return (
     <div
