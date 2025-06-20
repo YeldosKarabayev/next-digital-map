@@ -136,6 +136,7 @@ const ProviderTable = () => {
                             <TableHeader>
                                 <TableRow>
                                     <TableHead >№</TableHead>
+                                    <TableHead>ID</TableHead>
                                     <TableHead className="text-center">Название</TableHead>
                                     <TableHead className="text-center">Количество улиц</TableHead>
                                     <TableHead className="text-center">Цвет</TableHead>
@@ -155,6 +156,7 @@ const ProviderTable = () => {
                                         <React.Fragment key={provider.id}>
                                             <TableRow>
                                                 <TableCell>{index + 1}</TableCell>
+                                                <TableCell>{provider.id}</TableCell>
                                                 <TableCell
                                                     className="text-center cursor-pointer"
                                                     onClick={() => setSelectedProvider(provider)}

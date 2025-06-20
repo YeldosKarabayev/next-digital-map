@@ -24,15 +24,31 @@ export const AddProvider = ({ open, onClose }: AddProviderDialogProps) => {
         setLoading(true);
 
         try {
-            await addDoc(collection(db, "providers"), { 
-                name,
-                color,
-                createdAt: new Date().toISOString(), 
+            // await addDoc(collection(db, "providers"), { 
+            //     name,
+            //     color,
+            //     createdAt: new Date().toISOString(), 
+            // });
+
+            const res = await fetch("/api/admin/providers/add-provider", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, color }),
             });
+            
+            if(!res.ok){
+                const data = await res.json();
+                throw new Error(data.error);
+            }
+
+            const data = await res.json();
 
             setName("");
             setColor("#000000");
             onClose();
+
+            alert("Провайдер успешно добавлен!");
+
         } catch (error) {
             console.error("Ошибка добавления провайдера:", error);
         } finally {
