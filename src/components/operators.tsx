@@ -197,7 +197,11 @@ const OperatorsTable = () => {
                                                 </Button>
                                             </TableCell> */}
                                                 <TableCell>
-                                                    <EditOperatorForm operatorId={operator.id} />
+                                                    <EditOperatorForm 
+                                                        operatorId={operator.id} 
+                                                        name = {operator.name}
+                                                        pointIcon={operator.pointIcon} 
+                                                    />
                                                 </TableCell>
                                                 <TableCell className="text-center">
                                                     <Dialog

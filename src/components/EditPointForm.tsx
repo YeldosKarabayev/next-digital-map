@@ -21,42 +21,63 @@ export default function EditPountForm({ pointId, operatorId }: EditPointFormProp
     const [photoUrl, setPhotoUrl] = useState("");
     const [loading, setLoading] = useState(false)
 
-    useEffect(() => {
-        const fetchPoint = async () => {
-            setLoading(true);
-            try {
-                const docRef = doc(db, `operators/${operatorId}/points`, pointId);
-                const docSnap = await getDoc(docRef);
+    const [editedName, setEditedName] = useState("");
+    const [editedPointUrl, setEditedPointUrl] = useState("");
+    const [editedDescription, setEditedDescription] = useState("");
 
-                if (docSnap.exists()) {
-                    setName(docSnap.data().name);
-                    setDescription(docSnap.data().description || "");
-                    setPhotoUrl(docSnap.data().photoUrl || "");
-                } else {
-                    console.error("Точка оператора не найдена!");
-                }
-            } catch (error) {
-                console.error("Ошибка при загрузке точки оператора:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
+    // useEffect(() => {
+    //     const fetchPoint = async () => {
+    //         setLoading(true);
+    //         try {
+    //             const docRef = doc(db, `operators/${operatorId}/points`, pointId);
+    //             const docSnap = await getDoc(docRef);
 
-        if (open) {
-            fetchPoint();
-        }
-    }, [pointId, operatorId, open]);
+    //             if (docSnap.exists()) {
+    //                 setName(docSnap.data().name);
+    //                 setDescription(docSnap.data().description || "");
+    //                 setPhotoUrl(docSnap.data().photoUrl || "");
+    //             } else {
+    //                 console.error("Точка оператора не найдена!");
+    //             }
+    //         } catch (error) {
+    //             console.error("Ошибка при загрузке точки оператора:", error);
+    //         } finally {
+    //             setLoading(false);
+    //         }
+    //     };
+
+    //     if (open) {
+    //         fetchPoint();
+    //     }
+    // }, [pointId, operatorId, open]);
 
     const handleUpdatePoint = async () => {
         setLoading(true)
         try {
-            await updateDoc(doc(db, `operators/${operatorId}/points`, pointId), {
-                name,
-                description,
-                photoUrl
+            const res = await fetch("/api/admin/operators/points/edit-point", {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    id: pointId,
+                    name: name,
+                    photoUrl,
+                }),
             });
 
+
             setOpen(false);
+
+            if (!res.ok) {
+                console.error("Ошибка:", await res.json());
+                return;
+            }
+
+
+            const data = await res.json();
+            console.log("Обнавленный оператор:", data);
+            alert("Оператор: " + name + " успешно обновлен!");
 
         } catch (error) {
             console.log("Ошибка! Не удалось обновить данные точки оператора!", error);
@@ -81,22 +102,25 @@ export default function EditPountForm({ pointId, operatorId }: EditPointFormProp
                         <Input
                             value={name}
                             placeholder="Название"
-                            onChange={(e) => setName(e.target.value)}
+                            onChange={(e) => setEditedName(e.target.value)}
                         />
+                        <Input value={editedName} placeholder="Введите новое название" />
                         <Input
                             value={description}
                             placeholder="Описание"
-                            onChange={(e) => setDescription(e.target.value)}
+                            onChange={(e) => setEditedDescription(e.target.value)}
                         />
+                        <Input value={editedDescription} placeholder="Введите новое описание" />
                         <Input
                             value={photoUrl}
                             placeholder="URL фото"
-                            onChange={(e) => setPhotoUrl(e.target.value)}
+                            onChange={(e) => setEditedPointUrl(e.target.value)}
                         />
-                        {loading ? 
-                        <div className="mx-auto">
-                            Загрузка...
-                        </div>
+                        <Input value={editedPointUrl} placeholder="Введите новую ссылку" />
+                        {loading ?
+                            <div className="mx-auto">
+                                Загрузка...
+                            </div>
                             : <>
                                 {photoUrl &&
                                     <img src={photoUrl}
