@@ -1,58 +1,81 @@
 import { useState, useEffect } from "react";
-import { doc, updateDoc, getDoc } from "firebase/firestore";
-import { db } from "@/lib/firebaseConfig";
 import { Dialog, DialogTitle, DialogHeader, DialogContent } from "./ui/dialog";
 import { Button } from "./ui/Button";
 import { Input } from "./ui/input";
 import { EditIcon } from "lucide-react";
 import Toast from "./ui/Toast";
 
-
 interface EditPointFormProps {
     operatorId: string;
     pointId: string;
 }
 
-export default function EditPountForm({ pointId, operatorId }: EditPointFormProps) {
+interface Point {
+    name: string;
+    description?: string;
+    photoUrl?: string;
+}
 
-    const [name, setName] = useState("");
+export default function EditPointForm({ pointId, operatorId }: EditPointFormProps) {
     const [open, setOpen] = useState(false);
-    const [description, setDescription] = useState("");
-    const [photoUrl, setPhotoUrl] = useState("");
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(false);
+    const [point, setPoint] = useState<Point | null>(null);
+    
+    // Используем одно состояние для формы
+    const [formData, setFormData] = useState({
+        name: "",
+        description: "",
+        photoUrl: ""
+    });
 
-    const [editedName, setEditedName] = useState("");
-    const [editedPointUrl, setEditedPointUrl] = useState("");
-    const [editedDescription, setEditedDescription] = useState("");
+    useEffect(() => {
+        const fetchPoint = async () => {
+            if (!pointId) {
+                console.error('ID точки не указан');
+                return;
+            }
 
-    // useEffect(() => {
-    //     const fetchPoint = async () => {
-    //         setLoading(true);
-    //         try {
-    //             const docRef = doc(db, `operators/${operatorId}/points`, pointId);
-    //             const docSnap = await getDoc(docRef);
+            setLoading(true);
+            try {
+                const res = await fetch(
+                    `/api/admin/operators/points/point/${pointId}`,
+                    {
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                    }
+                );
 
-    //             if (docSnap.exists()) {
-    //                 setName(docSnap.data().name);
-    //                 setDescription(docSnap.data().description || "");
-    //                 setPhotoUrl(docSnap.data().photoUrl || "");
-    //             } else {
-    //                 console.error("Точка оператора не найдена!");
-    //             }
-    //         } catch (error) {
-    //             console.error("Ошибка при загрузке точки оператора:", error);
-    //         } finally {
-    //             setLoading(false);
-    //         }
-    //     };
+                if (!res.ok) {
+                    const errorData = await res.json().catch(() => ({}));
+                    throw new Error(
+                        errorData.error || `Ошибка ${res.status}: ${res.statusText}`
+                    );
+                }
 
-    //     if (open) {
-    //         fetchPoint();
-    //     }
-    // }, [pointId, operatorId, open]);
+                const data = await res.json();
+                setPoint(data);
+                setFormData({
+                    name: data.name || '',
+                    description: data.description || '',
+                    photoUrl: data.photoUrl || ''
+                });
+                
+            } catch (error) {
+                console.error('Ошибка загрузки:', error);
+                // Toast.error(error.message || 'Не удалось загрузить данные точки');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (pointId && open) {
+            fetchPoint();
+        }
+    }, [pointId, open]);
 
     const handleUpdatePoint = async () => {
-        setLoading(true)
+        setLoading(true);
         try {
             const res = await fetch("/api/admin/operators/points/edit-point", {
                 method: "PATCH",
@@ -61,31 +84,35 @@ export default function EditPountForm({ pointId, operatorId }: EditPointFormProp
                 },
                 body: JSON.stringify({
                     id: pointId,
-                    name: name,
-                    photoUrl,
+                    operatorId: operatorId,
+                    ...formData
                 }),
             });
 
-
-            setOpen(false);
-
             if (!res.ok) {
-                console.error("Ошибка:", await res.json());
-                return;
+                const errorData = await res.json();
+                throw new Error(errorData.error || "Ошибка при обновлении");
             }
 
-
             const data = await res.json();
-            console.log("Обнавленный оператор:", data);
-            alert("Оператор: " + name + " успешно обновлен!");
-
+            // Toast.success("Точка успешно обновлена!");
+            setOpen(false);
+            
         } catch (error) {
-            console.log("Ошибка! Не удалось обновить данные точки оператора!", error);
+            console.error("Ошибка при обновлении:", error);
+            // Toast.error(error.message || "Не удалось обновить точку");
         } finally {
             setLoading(false);
         }
-    }
+    };
 
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
 
     return (
         <>
@@ -96,39 +123,42 @@ export default function EditPountForm({ pointId, operatorId }: EditPointFormProp
             <Dialog open={open} onOpenChange={setOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Редактирование точки: <span className="text-gray-600">{name}</span></DialogTitle>
+                        <DialogTitle>
+                            Редактирование точки: <span className="text-gray-600">{point?.name}</span>
+                        </DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4">
                         <Input
-                            value={name}
+                            name="name"
+                            value={formData.name}
                             placeholder="Название"
-                            onChange={(e) => setEditedName(e.target.value)}
+                            onChange={handleChange}
                         />
-                        <Input value={editedName} placeholder="Введите новое название" />
                         <Input
-                            value={description}
+                            name="description"
+                            value={formData.description}
                             placeholder="Описание"
-                            onChange={(e) => setEditedDescription(e.target.value)}
+                            onChange={handleChange}
                         />
-                        <Input value={editedDescription} placeholder="Введите новое описание" />
                         <Input
-                            value={photoUrl}
+                            name="photoUrl"
+                            value={formData.photoUrl}
                             placeholder="URL фото"
-                            onChange={(e) => setEditedPointUrl(e.target.value)}
+                            onChange={handleChange}
                         />
-                        <Input value={editedPointUrl} placeholder="Введите новую ссылку" />
-                        {loading ?
-                            <div className="mx-auto">
-                                Загрузка...
-                            </div>
-                            : <>
-                                {photoUrl &&
-                                    <img src={photoUrl}
-                                        alt="Фото точки"
-                                        className="w-60 h-60 rounded-full mx-auto"
-                                    />}
-                            </>
-                        }
+                        
+                        {loading ? (
+                            <div className="mx-auto">Загрузка...</div>
+                        ) : (
+                            formData.photoUrl && (
+                                <img 
+                                    src={formData.photoUrl}
+                                    alt="Фото точки"
+                                    className="w-60 h-60 rounded-full mx-auto"
+                                />
+                            )
+                        )}
+                        
                         <div className="flex items-center justify-end gap-3">
                             <Button variant="secondary" onClick={() => setOpen(false)}>
                                 Отмена
@@ -141,8 +171,5 @@ export default function EditPountForm({ pointId, operatorId }: EditPointFormProp
                 </DialogContent>
             </Dialog>
         </>
-    )
+    );
 }
-
-
-

@@ -198,10 +198,11 @@ const OperatorsTable = () => {
                                             </TableCell> */}
                                                 <TableCell>
                                                     <EditOperatorForm 
-                                                        operatorId={operator.id} 
-                                                        name = {operator.name}
-                                                        pointIcon={operator.pointIcon} 
-                                                    />
+                                                        operatorId={operator.id}
+                                                        name={operator.name}
+                                                        pointIcon={operator.pointIcon} onClose={function (): void {
+                                                            throw new Error("Function not implemented.");
+                                                        } }                                                    />
                                                 </TableCell>
                                                 <TableCell className="text-center">
                                                     <Dialog
