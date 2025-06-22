@@ -64,6 +64,8 @@ export default function EditOperatorForm({ operatorId, name, pointIcon, onClose 
 
   const updateOperator = async () => {
 
+    setLoading(true);
+
     try {
 
       const res = await fetch("/api/admin/operators/operator/edit-operator", {
@@ -95,6 +97,9 @@ export default function EditOperatorForm({ operatorId, name, pointIcon, onClose 
 
       console.log("Ошибка при обновлении данных оператора!")
 
+    } finally {
+      setLoading(false);
+      setOpen(false);
     }
 
   };
