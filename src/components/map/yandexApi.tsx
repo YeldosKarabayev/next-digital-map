@@ -21,9 +21,18 @@ interface ProviderCable {
 interface MapComponentProps {
   points: OperatorPoint[];
   cables: ProviderCable[];
+  regions?: RegionPolygon[];
 }
 
-export const YandexMapApi = ({ points, cables }: MapComponentProps) => {
+interface RegionPolygon {
+  coordinates: { lat: number; lon: number }[]
+  color: string
+  name: string
+}
+
+
+
+export const YandexMapApi = ({ points, cables, regions }: MapComponentProps) => {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const isScriptLoaded = useRef(false);
   const [mapInstance, setMapInstance] = useState<any>(null);
@@ -52,7 +61,7 @@ export const YandexMapApi = ({ points, cables }: MapComponentProps) => {
     if (mapInstance) {
       renderMapObjects(mapInstance);
     }
-  }, [points, cables]);
+  }, [points, cables, regions]);
 
   const initMap = () => {
     if (!mapRef.current || !window.ymaps) return;
@@ -129,6 +138,39 @@ export const YandexMapApi = ({ points, cables }: MapComponentProps) => {
 
       map.geoObjects.add(polyline);
     });
+
+    console.log("Regions:", regions);
+
+    // Рисуем полигоны регионов
+    if (regions && regions.length > 0) {
+      regions.forEach(region => {
+        const coords = region.coordinates.map(coord => [coord.lat, coord.lon]);
+
+        if (coords.length > 2) {
+          const polygon = new window.ymaps.Polygon(
+            [coords], // <== ВАЖНО! Только один уровень
+            {
+              hintContent: region.name,
+              balloonContent: region.name
+            },
+            {
+              fillColor: region.color || '#ff0000',
+              strokeColor: region.color || '#000000',
+              opacity: 0.4,
+              strokeWidth: 10
+            }
+          );
+
+          map.geoObjects.add(polygon);
+
+          // Центрируем карту по полигону (опционально)
+          // map.setBounds(polygon.geometry.getBounds(), { checkZoomRange: true });
+        }
+      });
+    }
+
+
+
   };
 
   return (

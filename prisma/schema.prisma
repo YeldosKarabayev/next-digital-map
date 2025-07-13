@@ -64,3 +64,19 @@ model Point {
   operator    Operator @relation(fields: [operatorId], references: [id], onDelete: Cascade)
   operatorId  String
 }
+
+
+model Region {
+  id          String           @id
+  name        String
+  color       String
+  coordinates RegionCoordinate[]
+}
+
+model RegionCoordinate {
+  id        Int     @id @default(autoincrement())
+  lat       Float
+  lon       Float
+  region    Region  @relation(fields: [regionId], references: [id], onDelete: Cascade)
+  regionId  String
+}

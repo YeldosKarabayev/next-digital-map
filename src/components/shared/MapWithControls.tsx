@@ -37,11 +37,30 @@ interface Cable {
   street: string;
 }
 
+interface Region {
+  coordinates: any;
+  id: string;
+  name: string;
+  color: string;
+  lines: RegionPolygon[];
+}
+
+
+interface RegionPolygon {
+  id: string;
+  regionId: string;
+  coordinates: { lat: number; lon: number }[];
+}
+
 export const MapWithControls = () => {
   const [operators, setOperators] = useState<Operator[]>([]);
   const [providers, setProviders] = useState<Provider[]>([]);
+  const [regions, setRegions] = useState<Region[]>([]);
+  const [filteredRegions, setFilteredRegions] = useState<Region[]>([]);
+  const [allRegions, setAllRegions] = useState<Region[]>([]);
   const [selectedOperator, setSelectedOperator] = useState<string>("");
   const [selectedProvider, setSelectedProvider] = useState<string>("");
+  const [selectedRegion, setSelectedRegion] = useState<string>("");
   const [points, setPoints] = useState<Point[]>([]);
   const [cables, setCables] = useState<Cable[]>([]);
   const [loading, setLoading] = useState(true);
@@ -50,14 +69,16 @@ export const MapWithControls = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [operatorsRes, providersRes] = await Promise.all([
+        const [operatorsRes, providersRes, regionsRes] = await Promise.all([
           fetch("/api/admin/operators/operator"),
           fetch("/api/admin/providers"),
+          fetch("/api/admin/regions/region"),
         ]);
 
-        const [operatorsJson, providersJson] = await Promise.all([
+        const [operatorsJson, providersJson, regionsJson] = await Promise.all([
           operatorsRes.json(),
           providersRes.json(),
+          regionsRes.json(),
         ]);
 
         const operators = operatorsJson.map((operator: any) => ({
@@ -94,8 +115,23 @@ export const MapWithControls = () => {
             : [],
         }));
 
+        const regions = regionsJson.map((region: any) => ({
+          id: region.id,
+          name: region.name,
+          color: region.color,
+          coordinates: Array.isArray(region.coordinates)
+            ? region.coordinates.map((polygon: any) => ({
+              id: polygon.id || `${region.id}-polygon`,
+              regionId: region.id,
+              lat: polygon.lat,
+              lon: polygon.lon,
+            }))
+            : [],
+        }));
+
         setOperators(operators);
         setProviders(providers);
+        setRegions(regions);
       } catch (error) {
         console.error("Ошибка при загрузке данных:", error);
         alert("Ошибка загрузки данных");
@@ -130,6 +166,19 @@ export const MapWithControls = () => {
       setCables([]);
     }
   }, [selectedProvider, providers]);
+
+  useEffect(() => {
+    if (selectedRegion === "all") {
+      setFilteredRegions(regions);
+    } else if (selectedRegion) {
+      const region = regions.find(r => r.id === selectedRegion);
+      setFilteredRegions(region ? [region] : []);
+    } else {
+      setFilteredRegions([]);
+    }
+  }, [selectedRegion, regions]);
+
+  console.log("REGION предварительный:", regions);
 
   if (loading) {
     return <div className="text-white p-5">Загрузка карты...</div>;
@@ -171,6 +220,22 @@ export const MapWithControls = () => {
             ))}
           </select>
         </div>
+
+        <div className="flex gap-2 items-center">
+          <label htmlFor="region-select" className="text-white">Фильтр регионов:</label>
+          <select
+            id="region-select"
+            className="border px-2 py-1 rounded"
+            onChange={(e) => setSelectedRegion(e.target.value)}
+            value={selectedRegion}
+          >
+            <option value="">Выберите регион</option>
+            <option value="all">Все регионы</option>
+            {regions.map(region => (
+              <option key={region.id} value={region.id}>{region.name}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* Карта */}
@@ -193,7 +258,20 @@ export const MapWithControls = () => {
             streetName: cable.street || "Unknown Street",
           };
         })}
+
+
+        regions={filteredRegions.map(region => ({
+          name: region.name,
+          color: region.color,
+          coordinates: region.coordinates, // ⬅️ тут напрямую, без `.map(...)`
+        }))}
+
+
       />
     </div>
+
+
   );
+
 };
+

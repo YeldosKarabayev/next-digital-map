@@ -10,6 +10,7 @@ import {
   LifeBuoy,
   Map,
   MapPin,
+  Palette,
   PieChart,
   Send,
   Settings2,
@@ -234,11 +235,18 @@ export function AppSidebar({ setActiveTab, ...props }: AppSidebarProps) {
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
+            <SidebarMenuButton onClick={() => setActiveTab("spots")}>
+              <Palette className="mr-2 size-4" />
+              Белые пятна
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
             <SidebarMenuButton onClick={() => router.push("/")}>
               <Map className="mr-2 size-4" />
               Карта
             </SidebarMenuButton>
           </SidebarMenuItem>
+
           <SidebarMenuItem>
             <SidebarMenuButton onClick={() => setActiveTab("settings")}>
               <Settings2 className="mr-2 size-4" />

@@ -5,6 +5,7 @@ import OperatorsTable from "@/components/operators";
 import AddCable from "@/components/AddCable";
 import CablePointForm from "@/components/CablePointForm";
 import ProviderTable from "@/components/Providers";
+import Spots from "@/components/spots";
 
 
 interface AdminPanelProps {
@@ -20,6 +21,7 @@ export default function AdminPanel({ activeTab }: AdminPanelProps) {
         throw new Error("Function not implemented.");
       } } />}
       {activeTab === "addCable" && <ProviderTable />}
+      {activeTab === "spots" && <Spots />}
     </div>
   )
 }
