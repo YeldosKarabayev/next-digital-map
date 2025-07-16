@@ -33,7 +33,7 @@ export default function SpotsPointForm({ regionId, onClose, name, onBack }: Poin
         setLoading(true);
         try {
             const response = await fetch("/api/admin/regions/region/" + regionId + "/points");
-            if (!response.ok) throw new Error("Failed to fetch points");
+            if (!response.ok) console.log("Failed to fetch points");
             const data = await response.json();
             setPoints(data);
         } catch (error) {

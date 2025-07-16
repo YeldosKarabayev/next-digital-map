@@ -18,6 +18,7 @@ import Toast from "./ui/Toast";
 import CablePointForm from "./CablePointForm";
 import SpotsPointForm from "./SpotsPointsForm";
 import { AddProvider } from "./shared/AddProviderForm";
+import AddRegion from "./AddRegion";
 
 
 interface Spot {
@@ -25,6 +26,7 @@ interface Spot {
   name: string;
   color: string;
   coordinates: { lat: number; lng: number }[];
+  onBack: () => void;
 }
 
 
@@ -32,6 +34,7 @@ export default function Spots() {
 
   const [spots, setSpots] = useState<Spot[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [addRegion, setAddRegion] = useState(false);
   const [selectRegion, setSelectRegion] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -59,6 +62,10 @@ export default function Spots() {
 
   
 
+  function onBack(): void {
+    throw new Error("Function not implemented.");
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, x: -100 }}
@@ -76,6 +83,10 @@ export default function Spots() {
             onUpdate={fetchSpots} id={""} color={""} name={""} coordinates={[]} />
         ) : (
           <>
+          {addRegion ? (
+            <AddRegion onBack={onBack}  />
+          ) : (
+          <>
             <div className="flex justify-between items-center mb-4">
               <div className="flex items-center gap-8 mb-6">
                 <h1 className="text-2xl font-semibold text-gray-600 mb-2">Регионы</h1>
@@ -89,17 +100,9 @@ export default function Spots() {
                 </button>
               </div>
 
-              <button onClick={() => setIsDialogOpen(true)}>
+              <button onClick={() => setAddRegion(true)}>
                 <PlusSquare className="size-6" />
-              </button>
-              {/* Add Provider Dialog */}
-              <AddProvider
-                open={isDialogOpen}
-                onClose={() => {
-                  setIsDialogOpen(false);
-                  // fetachProviders();
-                }}
-              />
+              </button>             
             </div>
             {loading ? (
               <p>Загрузка...</p>
@@ -110,7 +113,7 @@ export default function Spots() {
                     <TableHead className="text-center">№</TableHead>
                     <TableHead className="text-center">Название</TableHead>
                     <TableHead className="text-center">Цвет</TableHead>
-                    <TableHead className="text-center">Координаты</TableHead>
+                    {/* <TableHead className="text-center">Координаты</TableHead> */}
                     <TableHead className="text-center">Действия</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -127,7 +130,7 @@ export default function Spots() {
                           />
                         </div>
                       </TableCell>
-                      <TableCell className="text-center">{spot.coordinates.map(coord => `(${coord.lat}, ${coord.lng})`).join(', ')}</TableCell>
+                      {/* <TableCell className="text-center">{spot.coordinates.map(coord => `(${coord.lat}, ${coord.lng})`).join(', ')}</TableCell> */}
                       <TableCell className="text-center">
                         {/* Действия с точкой */}
                         <Button variant="ghost" size="icon" onClick={() => setSelectRegion(spot.id)}>
@@ -141,9 +144,10 @@ export default function Spots() {
               </Table>
             )}
           </>
+          )}
+          </>
         )}
       </div>
-
 
     </motion.div>
   )

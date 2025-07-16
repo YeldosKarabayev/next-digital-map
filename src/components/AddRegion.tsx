@@ -105,12 +105,12 @@ export default function AddRegion({ onBack }: AddRegionProps): JSX.Element {
 
         <div className="space-y-2">
           <label className="text-gray-600 font-medium">Цвет региона:</label>
-          <input
-            type="color"
-            value={color}
-            onChange={(e) => setColor(e.target.value)}
-            className="w-16 h-8 border rounded cursor-pointer"
-          />
+          <motion.div
+              initial={{ backgroundColor: "#000000" }}
+              animate={{ backgroundColor: color }}
+              transition={{ duration: 0.5 }}
+              className="w-16 h-16 rounded-full border shadow-md"
+            />
         </div>
 
         <div className="h-[400px]">
