@@ -42,15 +42,16 @@ interface Region {
   id: string;
   name: string;
   color: string;
-  lines: RegionPolygon[];
+  areas: RegionPolygon[];
 }
 
-
 interface RegionPolygon {
+  name: string;
   id: string;
   regionId: string;
   coordinates: { lat: number; lon: number }[];
 }
+
 
 export const MapWithControls = () => {
   const [operators, setOperators] = useState<Operator[]>([]);
@@ -115,19 +116,27 @@ export const MapWithControls = () => {
             : [],
         }));
 
+        // const regions = regionsJson.map((region: any) => ({
+        //   id: region.id,
+        //   name: region.name,
+        //   color: region.color,
+        //   coordinates: Array.isArray(region.coordinates)
+        //     ? region.coordinates.map((polygon: any) => ({
+        //       id: polygon.id || `${region.id}-polygon`,
+        //       regionId: region.id,
+        //       lat: polygon.lat,
+        //       lon: polygon.lon,
+        //     }))
+        //     : [],
+        // }));
+
         const regions = regionsJson.map((region: any) => ({
           id: region.id,
           name: region.name,
           color: region.color,
-          coordinates: Array.isArray(region.coordinates)
-            ? region.coordinates.map((polygon: any) => ({
-              id: polygon.id || `${region.id}-polygon`,
-              regionId: region.id,
-              lat: polygon.lat,
-              lon: polygon.lon,
-            }))
-            : [],
+          areas: region.areas || [],
         }));
+
 
         setOperators(operators);
         setProviders(providers);
@@ -263,8 +272,15 @@ export const MapWithControls = () => {
         regions={filteredRegions.map(region => ({
           name: region.name,
           color: region.color,
-          coordinates: region.coordinates, // ⬅️ тут напрямую, без `.map(...)`
+          areas: region.areas.map(area => ({
+            name: area.name,
+            coordinates: area.coordinates.map(coord => ({
+              lat: coord.lat,
+              lon: coord.lon,
+            })),
+          })),
         }))}
+
 
 
       />

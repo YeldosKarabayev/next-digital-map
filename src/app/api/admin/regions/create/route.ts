@@ -1,38 +1,48 @@
 import { prisma } from "@/lib/prisma";
+import { error } from "console";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
 
+
+    const { regionId, areaName, color, areas } = await req.json();
+
+    if (!regionId || !Array.isArray(areas)) {
+        return NextResponse.json({ error: "Неверные данные" }, { status: 400 });
+    }
+
     try {
-        const { name, color, coordinates } = await req.json();
-
-        if (!name || !color || !Array.isArray(coordinates) || coordinates.length < 3) {
-            return NextResponse.json({ error: "Неверные данные" }, { status: 400 });
-        }
-
-        const id = crypto.randomUUID();
-
-        const newRegion = await prisma.region.create({
-            data: {
-                id,
-                name,
-                color,
-                coordinates: {
-                    create: coordinates.map((coord: { lat: number; lng: number }) => ({
-                        lat: coord.lat,
-                        lon: coord.lng,
-                    })),
-                },
-            },
-            include: {
-                coordinates: true,
-            },
+        // Проверим, существует ли регион
+        const existingRegion = await prisma.region.findUnique({
+            where: { id: regionId },
         });
 
-        return NextResponse.json(newRegion, { status: 201 });
+        if (!existingRegion) {
+            return NextResponse.json({ error: "Регион не найден" }, { status: 404 });
+        }
+
+        // Добавим области к существующему региону
+        const area = await prisma.area.create({
+            data: {
+                id: crypto.randomUUID(),
+                name: areaName,
+                regionId,
+                coordinates: {
+                    create: areas.map((p: {
+                        lng: number; lat: number; lon: number
+                    }) => ({
+                        lat: p.lat,
+                        lon: p.lon ?? p.lng,
+                    })),
+                }
+            }
+        });
+
+        return NextResponse.json({ message: "Области добавлены", area }, { status: 201 });
 
     } catch (error) {
-        console.error(error);
+        console.error("Ошибка при добавлении областей:", error);
         return NextResponse.json({ error: "Ошибка сервера" }, { status: 500 });
     }
+
 }

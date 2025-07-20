@@ -5,16 +5,58 @@ import { YMaps, Map, Polygon } from '@pbe/react-yandex-maps';
 import { motion } from 'framer-motion';
 import { Button } from './ui/Button';
 import { ChevronLeft } from 'lucide-react';
+import { SketchPicker } from 'react-color';
 
 interface AddRegionProps {
   onBack: () => void;
 }
 
+interface Region {
+  id: string;
+  name: string;
+  color: string;
+  areas: {
+    name: string;
+    coordinates: { lat: number; lon: number }[];
+  }[];
+}
+
 export default function AddRegion({ onBack }: AddRegionProps): JSX.Element {
   const [polygonPoints, setPolygonPoints] = useState<{ lat: number; lng: number }[]>([]);
+  const [regionId, setRegionId] = useState<string | null>(null);
+  const [regions, setRegions] = useState<Region[]>([]);
   const [regionName, setRegionName] = useState('');
-  const [color, setColor] = useState('#FF0000');
+  const [areaName, setAreaName] = useState('');
+  const [color, setColor] = useState('#7393B3');
   const [loading, setLoading] = useState(false);
+  const [isPickerOpen, setIsPickerOpen] = useState(false);
+
+
+  useEffect(() => {
+
+    const fetchRegions = async () => {
+      const res = await fetch("/api/admin/regions/region");
+      if (res.ok) {
+        const data = await res.json();
+        setRegions(data);
+      }
+    }
+
+    fetchRegions();
+  }, []);
+
+
+  const handleRegionNameChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedId = e.target.value;
+    setRegionId(selectedId);
+
+    const selectedRegion = regions.find((r) => r.id === selectedId);
+    if (selectedRegion) {
+      setColor(selectedRegion.color);
+    }
+
+  };
+
 
   const handleMapClick = (e: any) => {
     const coords = e.get('coords');
@@ -30,10 +72,10 @@ export default function AddRegion({ onBack }: AddRegionProps): JSX.Element {
   };
 
   const saveRegion = async () => {
-    if (!regionName.trim()) {
-      alert('Введите название региона');
-      return;
-    }
+    // if (!regionName.trim()) {
+    //   alert('Введите название региона');
+    //   return;
+    // }
 
     if (polygonPoints.length < 3) {
       alert('Регион должен состоять минимум из 3 точек');
@@ -49,10 +91,12 @@ export default function AddRegion({ onBack }: AddRegionProps): JSX.Element {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: regionName,
+          regionId,
+          areaName,
           color,
-          coordinates: polygonPoints,
-        }),
+          areas: polygonPoints.map((p) => ({ lat: p.lat, lon: p.lng })),
+        })
+
       });
 
       if (!res.ok) throw new Error('Ошибка при создании региона');
@@ -67,6 +111,7 @@ export default function AddRegion({ onBack }: AddRegionProps): JSX.Element {
       setLoading(false);
     }
   };
+
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -92,25 +137,71 @@ export default function AddRegion({ onBack }: AddRegionProps): JSX.Element {
           <Button onClick={onBack}>
             <ChevronLeft />
           </Button>
-          <h2 className="text-xl font-semibold">Добавить регион</h2>
+          <h2 className="text-xl font-semibold">Добавить пятно</h2>
         </div>
+
+        <select
+          className="p-2 border rounded"
+          value={regionId ?? ''}
+          onChange={handleRegionNameChange}
+        >
+          <option value="">Выберите регион</option>
+          {regions.map((region) => (
+            <option key={region.id} value={region.id}>
+              {region.name}
+            </option>
+          ))}
+        </select>
 
         <input
           type="text"
-          placeholder="Название региона"
-          value={regionName}
-          onChange={(e) => setRegionName(e.target.value)}
+          placeholder="Название оператора"
+          value={areaName}
+          onChange={(e) => setAreaName(e.target.value)}
           className="p-2 border rounded"
         />
 
-        <div className="space-y-2">
+        {/* <div className="space-y-2">
           <label className="text-gray-600 font-medium">Цвет региона:</label>
-          <input
-            type="color"
-            value={color}
-            onChange={(e) => setColor(e.target.value)}
-            className="w-16 h-8 border rounded cursor-pointer"
+          <motion.div
+              initial={{ backgroundColor: "#000000" }}
+              animate={{ backgroundColor: color }}
+              transition={{ duration: 0.5 }}
+              className="w-16 h-16 rounded-full border shadow-md"
+            />
+        </div> */}
+        <div className="relative">
+          <Button
+            onClick={() => setIsPickerOpen(!isPickerOpen)}
+            variant="secondary"
+          >
+            Выбрать цвет пятна
+          </Button>
+
+          {isPickerOpen && (
+            <div className="absolute z-50 mt-2 shadow-lg">
+              <SketchPicker color={color} onChangeComplete={(c) => setColor(c.hex)} />
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-2 flex items-center gap-3">
+          <label className="text-gray-600 font-medium">Цвет пятна:</label>
+
+          <motion.div
+            initial={{ backgroundColor: "#000000" }}
+            animate={{ backgroundColor: color }}
+            transition={{ duration: 0.5 }}
+            className="w-16 h-16 rounded-full border shadow-md"
           />
+
+          {/* <input
+                                type="color"
+                                value={color}
+                                onChange={handleColorChange}
+                                disabled={!manualColor}
+                                className={`w-full p-2 mt-2 ${manualColor ? "cursor-pointer" : "cursor-not-allowed opacity-50"}`}
+                            /> */}
         </div>
 
         <div className="h-[400px]">

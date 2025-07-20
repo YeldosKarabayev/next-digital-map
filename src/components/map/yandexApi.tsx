@@ -25,10 +25,14 @@ interface MapComponentProps {
 }
 
 interface RegionPolygon {
-  coordinates: { lat: number; lon: number }[]
-  color: string
-  name: string
+  name: string;
+  color: string;
+  areas: {
+    name: string;
+    coordinates: { lat: number; lon: number }[];
+  }[];
 }
+
 
 
 
@@ -139,35 +143,64 @@ export const YandexMapApi = ({ points, cables, regions }: MapComponentProps) => 
       map.geoObjects.add(polyline);
     });
 
-    console.log("Regions:", regions);
+    console.log("Regions на яндексе:", regions);
 
     // Рисуем полигоны регионов
+    // if (regions && regions.length > 0) {
+    //   regions.forEach(region => {
+    //     const coords = region.coordinates.map(coord => [coord.lat, coord.lon]);
+
+    //     if (coords.length > 2) {
+    //       const polygon = new window.ymaps.Polygon(
+    //         [coords], // <== ВАЖНО! Только один уровень
+    //         {
+    //           hintContent: region.name,
+    //           balloonContent: region.name
+    //         },
+    //         {
+    //           fillColor: region.color || '#ff0000',
+    //           strokeColor: region.color || '#000000',
+    //           opacity: 0.4,
+    //           strokeWidth: 10
+    //         }
+    //       );
+
+    //       map.geoObjects.add(polygon);
+
+    //       // Центрируем карту по полигону (опционально)
+    //       // map.setBounds(polygon.geometry.getBounds(), { checkZoomRange: true });
+    //     }
+    //   });
+    // }
+
     if (regions && regions.length > 0) {
-      regions.forEach(region => {
-        const coords = region.coordinates.map(coord => [coord.lat, coord.lon]);
+        regions.forEach(region => {
+          if (region.areas && region.areas.length > 0) {
+          region.areas.forEach(area => {
+            const coords = area.coordinates.map(coord => [coord.lat, coord.lon]);
 
-        if (coords.length > 2) {
-          const polygon = new window.ymaps.Polygon(
-            [coords], // <== ВАЖНО! Только один уровень
-            {
-              hintContent: region.name,
-              balloonContent: region.name
-            },
-            {
-              fillColor: region.color || '#ff0000',
-              strokeColor: region.color || '#000000',
-              opacity: 0.4,
-              strokeWidth: 10
-            }
-          );
+          if (coords.length > 2) {
+            const polygon = new window.ymaps.Polygon(
+              [coords],
+              {
+                hintContent: `${region.name} - ${area.name}`,
+                balloonContent: `${region.name} - ${area.name}`
+              },
+              {
+                fillColor: region.color || '#ff0000',
+                strokeColor: region.color || '#000000',
+                opacity: 0.4,
+                strokeWidth: 10
+              }
+            );
 
-          map.geoObjects.add(polygon);
-
-          // Центрируем карту по полигону (опционально)
-          // map.setBounds(polygon.geometry.getBounds(), { checkZoomRange: true });
+            map.geoObjects.add(polygon);
+          }
+        });
         }
       });
     }
+
 
 
 

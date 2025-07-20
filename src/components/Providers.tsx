@@ -136,7 +136,6 @@ const ProviderTable = () => {
                             <TableHeader>
                                 <TableRow>
                                     <TableHead >№</TableHead>
-                                    <TableHead>ID</TableHead>
                                     <TableHead className="text-center">Название</TableHead>
                                     <TableHead className="text-center">Количество улиц</TableHead>
                                     <TableHead className="text-center">Цвет</TableHead>
@@ -156,7 +155,6 @@ const ProviderTable = () => {
                                         <React.Fragment key={provider.id}>
                                             <TableRow>
                                                 <TableCell>{index + 1}</TableCell>
-                                                <TableCell>{provider.id}</TableCell>
                                                 <TableCell
                                                     className="text-center cursor-pointer"
                                                     onClick={() => setSelectedProvider(provider)}
@@ -202,17 +200,19 @@ const ProviderTable = () => {
                                                             </DialogHeader>
                                                             <div className="flex gap-4 justify-end mt-4">
                                                                 <Button
+                                                                    variant="secondary"
                                                                     onClick={() => setOpenDialog(null)}
                                                                     disabled={loading}
                                                                 >
                                                                     Отмена
                                                                 </Button>
                                                                 <Button
-                                                                    variant="destructive"
+                                                                    
                                                                     onClick={() => {
                                                                         hanldeDeleteProvider(provider.id);
                                                                         setOpenDialog(null);
                                                                     }}
+                                                                        disabled={loading}
                                                                 >
                                                                     Удалить
                                                                 </Button>

@@ -225,13 +225,14 @@ const OperatorsTable = () => {
                                                             </DialogHeader>
                                                             <div className="flex gap-4 justify-end mt-4">
                                                                 <Button
+                                                                    variant="secondary"
                                                                     onClick={() => setOpenDialog(null)}
                                                                     disabled={loading}
                                                                 >
                                                                     Отмена
                                                                 </Button>
                                                                 <Button
-                                                                    variant="destructive"
+                                    
                                                                     onClick={() => {
                                                                         handleDeleteOperator(operator.id);
                                                                         setOpenDialog(null);

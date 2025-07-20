@@ -18,6 +18,8 @@ import Toast from "./ui/Toast";
 import CablePointForm from "./CablePointForm";
 import SpotsPointForm from "./SpotsPointsForm";
 import { AddProvider } from "./shared/AddProviderForm";
+import AddRegion from "./AddRegion";
+import { AddRegionArea } from "./shared/AddRegionArea";
 
 
 interface Spot {
@@ -25,6 +27,7 @@ interface Spot {
   name: string;
   color: string;
   coordinates: { lat: number; lng: number }[];
+  onBack: () => void;
 }
 
 
@@ -32,8 +35,9 @@ export default function Spots() {
 
   const [spots, setSpots] = useState<Spot[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [addRegion, setAddRegion] = useState(false);
   const [selectRegion, setSelectRegion] = useState<string | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [openDialog, setOpenDialog] = useState<string | null>(null);
 
 
 
@@ -57,7 +61,40 @@ export default function Spots() {
     fetchSpots();
   }, [fetchSpots]);
 
-  
+
+
+  function onBack(): void {
+    setAddRegion(false);
+  }
+
+  const handleDelete = async (id: string) => {
+    try {
+      const res = await fetch(`/api/admin/regions/delete/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (!res.ok) {
+        throw new Error('Ошибка при удалении пятна');
+      }
+
+      const data = await res.json();
+
+      alert(data.message || 'Пятно успешно удалено');
+
+      setSpots((prev) => prev.filter((spot) => spot.id !== id));
+      setOpenDialog(null);
+      fetchSpots(); // Обновляем список пятен после удаления
+
+    } catch (error) {
+      console.error('Ошибка при удалении пятна:', error);
+      alert('Произошла ошибка при удалении пятна');
+    }
+  }
+
+
 
   return (
     <motion.div
@@ -74,79 +111,125 @@ export default function Spots() {
             onClose={() => setSelectRegion(null)}
             onBack={() => setSelectRegion(null)}
             onUpdate={fetchSpots} id={""} color={""} name={""} coordinates={[]} />
+
         ) : (
           <>
-            <div className="flex justify-between items-center mb-4">
-              <div className="flex items-center gap-8 mb-6">
-                <h1 className="text-2xl font-semibold text-gray-600 mb-2">Регионы</h1>
-                <button onClick={fetchSpots} className="flex items-center gap-2 rounded-md p-1 border-2 border-gray-900">
-                  <motion.div
-                    animate={{ rotate: loading ? 360 : 0 }}
-                    transition={{ repeat: loading ? Infinity : 0, duration: 0.6, ease: "linear" }}
-                  >
-                    <RefreshCw size={20} />
-                  </motion.div>
-                </button>
-              </div>
-
-              <button onClick={() => setIsDialogOpen(true)}>
-                <PlusSquare className="size-6" />
-              </button>
-              {/* Add Provider Dialog */}
-              <AddProvider
-                open={isDialogOpen}
-                onClose={() => {
-                  setIsDialogOpen(false);
-                  // fetachProviders();
-                }}
+            {addRegion ? (
+              <AddRegionArea 
+                open={addRegion}
+                onClose={() => setAddRegion(false)}
               />
-            </div>
-            {loading ? (
-              <p>Загрузка...</p>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-center">№</TableHead>
-                    <TableHead className="text-center">Название</TableHead>
-                    <TableHead className="text-center">Цвет</TableHead>
-                    <TableHead className="text-center">Координаты</TableHead>
-                    <TableHead className="text-center">Действия</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {spots.map((spot, index) => (
-                    <TableRow key={spot.id}>
-                      <TableCell className="text-center">{index + 1}</TableCell>
-                      <TableCell className="text-center">{spot.name}</TableCell>
-                      <TableCell className="text-center">
-                        <div className="flex items-center justify-center gap-2">
-                          <div
-                            className="w-4 h-4 rounded-full"
-                            style={{ backgroundColor: spot.color }}
-                          />
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-center">{spot.coordinates.map(coord => `(${coord.lat}, ${coord.lng})`).join(', ')}</TableCell>
-                      <TableCell className="text-center">
-                        {/* Действия с точкой */}
-                        <Button variant="ghost" size="icon" onClick={() => setSelectRegion(spot.id)}>
-                          <ChevronRight />
-                        </Button>
-                        {/* Здесь можно добавить другие действия, например, редактирование или удаление */}
-                      </TableCell>
+              <>
+                <div className="flex justify-between items-center mb-4">
+                  <div className="flex items-center gap-8 mb-6">
+                    <h1 className="text-2xl font-semibold text-gray-600 mb-2">Белые пятна</h1>
+                    <button onClick={fetchSpots} className="flex items-center gap-2 rounded-md p-1 border-2 border-gray-900">
+                      <motion.div
+                        animate={{ rotate: loading ? 360 : 0 }}
+                        transition={{ repeat: loading ? Infinity : 0, duration: 0.6, ease: "linear" }}
+                      >
+                        <RefreshCw size={20} />
+                      </motion.div>
+                    </button>
+                  </div>
+
+                  <button onClick={() => setAddRegion(true)}>
+                    <PlusSquare className="size-6" />
+                  </button>
+                </div>
+
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-center">№</TableHead>
+                      <TableHead className="text-center">Название</TableHead>
+                      <TableHead className="text-center">Цвет</TableHead>
+                      <TableHead className="text-center">Действия</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {loading ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center">
+                          <Toast message="Пожалуйста, подождите" onClose={() => { }} />
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      spots.map((spot, index) => (
+                        <TableRow key={spot.id}>
+                          <TableCell className="text-center">{index + 1}</TableCell>
+                          <TableCell className="text-center">{spot.name}</TableCell>
+                          <TableCell className="text-center">
+                            <div className="flex items-center justify-center gap-2">
+                              <div
+                                className="w-4 h-4 rounded-full"
+                                style={{ backgroundColor: spot.color }}
+                              />
+                            </div>
+                          </TableCell>
+                          {/* <TableCell className="text-center">{spot.coordinates.map(coord => `(${coord.lat}, ${coord.lng})`).join(', ')}</TableCell> */}
+
+                          <TableCell className="text-center">
+                            <Dialog open={openDialog === spot.id}
+                            // onOpenChange={() => setOpenDialog(null)}
+                            >
+                              <DialogTrigger asChild>
+                                <Button
+                                  variant="destructive"
+                                  onClick={() => setOpenDialog(spot.id)}
+                                >
+                                  <Trash2 size={16} />
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent>
+                                <DialogHeader>
+                                  <DialogTitle>Удалить кабель?</DialogTitle>
+                                  <DialogDescription>
+                                    Вы уверены, что хотите удалить:
+                                    <span className="text-lg text-blue-800 font-semibold">{spot.name}</span>?
+                                  </DialogDescription>
+                                </DialogHeader>
+                                <div className="flex gap-4 justify-end mt-4">
+                                  <Button
+                                    variant="secondary"
+                                    onClick={() => setOpenDialog(null)}
+                                    disabled={loading}
+                                  >
+                                    Отмена
+                                  </Button>
+                                  <Button
+                                    onClick={() => handleDelete(spot.id)}
+                                    disabled={loading}
+
+                                  >
+                                    Удалить
+                                  </Button>
+                                </div>
+                              </DialogContent>
+                            </Dialog>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Button
+                              variant="ghost"
+                              onClick={() => setSelectRegion(spot.id)}
+                            >
+                              <ChevronRight size={16} />
+                            </Button>
+                          </TableCell>
+
+                        </TableRow>
+                      )
+                      ))}
+                  </TableBody>
+                </Table>
+              </>
             )}
           </>
         )}
       </div>
 
-
     </motion.div>
   )
 }
-
 

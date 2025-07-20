@@ -181,7 +181,7 @@ export default function AddCable({ onBack }: CableForm): JSX.Element {
                 )}
             </div> */}
 
-                <div className="space-y-2">
+                <div className="space-y-2 flex items-center gap-3">
                     <label className="text-gray-600 font-medium">Цвет кабеля:</label>
 
                     <motion.div

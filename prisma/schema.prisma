@@ -67,16 +67,27 @@ model Point {
 
 
 model Region {
-  id          String           @id
-  name        String
-  color       String
-  coordinates RegionCoordinate[]
+  id     String  @id @default(uuid())
+  name   String
+  color  String
+
+  areas  Area[]
 }
 
-model RegionCoordinate {
-  id        Int     @id @default(autoincrement())
-  lat       Float
-  lon       Float
-  region    Region  @relation(fields: [regionId], references: [id], onDelete: Cascade)
-  regionId  String
+model Area {
+  id       String           @id @default(uuid())
+  name     String?
+  region   Region           @relation(fields: [regionId], references: [id], onDelete: Cascade)
+  regionId String
+
+  coordinates AreaCoordinate[]
 }
+
+model AreaCoordinate {
+  id      Int     @id @default(autoincrement())
+  lat     Float
+  lon     Float
+  area    Area    @relation(fields: [areaId], references: [id], onDelete: Cascade)
+  areaId  String
+}
+

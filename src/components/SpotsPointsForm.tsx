@@ -8,6 +8,7 @@ import { ChevronLeft, ChevronRight, PlusSquare, RefreshCw, Trash2 } from "lucide
 import Toast from "./ui/Toast";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import AddCable from "./AddCable";
+import AddRegion from "./AddRegion";
 
 interface SpotsPointFormProps { }
 
@@ -26,14 +27,14 @@ interface Point {
 export default function SpotsPointForm({ regionId, onClose, name, onBack }: Point) {
     const [points, setPoints] = useState<Point[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
-    const [openDialog, setOpenDialog] = useState(false);
+    const [openDialog, setOpenDialog] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState(false);
 
-    const fetchPoints = async () => {
+    const fetchPoints = async (signal?: AbortSignal) => {
         setLoading(true);
         try {
-            const response = await fetch("/api/admin/regions/region/" + regionId + "/points");
-            if (!response.ok) throw new Error("Failed to fetch points");
+            const response = await fetch(`/api/admin/regions/areas?regionId=${regionId}`, { signal });
+            if (!response.ok) console.log("Failed to fetch points");
             const data = await response.json();
             setPoints(data);
         } catch (error) {
@@ -47,7 +48,37 @@ export default function SpotsPointForm({ regionId, onClose, name, onBack }: Poin
         fetchPoints();
     }, []);
 
-    
+    const handleDeletePoint = async (pointId: string) => {
+        setLoading(true);
+        console.log("Deleting point with ID:", pointId);
+        try {
+            const response = await fetch(`/api/admin/regions/areas/delete/${pointId}`, {
+                method: "DELETE",
+            });
+            if (!response.ok) throw new Error("Failed to delete point");
+            await fetchPoints();
+
+            alert("Область успешно удалена!");
+
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
+    useEffect(() => {
+        const controller = new AbortController();
+        const signal = controller.signal;
+
+        fetchPoints(signal);
+
+        return () => {
+            controller.abort();
+        };
+    }, []);
+
 
     return (
         <>
@@ -59,7 +90,7 @@ export default function SpotsPointForm({ regionId, onClose, name, onBack }: Poin
                     transition={{ duration: 0.4 }}
                     className="p-4"
                 >
-                    <AddCable onBack={onBack} />
+                    <AddRegion onBack={onBack} />
                 </motion.div>
             ) : (
 
@@ -78,7 +109,7 @@ export default function SpotsPointForm({ regionId, onClose, name, onBack }: Poin
                                     {/* Назад */}
                                 </Button>
                                 <button
-                                    // onClick={() => fetchCables()}
+                                    onClick={() => fetchPoints()}
                                     className="flex items-center gap-2 rounded-md p-1 border-2 border-gray-900"
                                 >
                                     <motion.div
@@ -103,35 +134,64 @@ export default function SpotsPointForm({ regionId, onClose, name, onBack }: Poin
                             </div>
                         </div>
                         {loading ? (
-                            <p>Загрузка...</p>
+                            <Toast message="Загрузка..." onClose={() => { }} />
                         ) : (
                             <Table>
                                 <TableHeader>
                                     <TableRow>
                                         <TableCell className="text-center">№</TableCell>
                                         <TableCell className="text-center">Название</TableCell>
-                                        <TableCell className="text-center">Координаты</TableCell>
                                         <TableCell className="text-center">Действия</TableCell>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {points.map((point, index) => (
-                                        <TableRow key={point.id}>
-                                            <TableCell className="text-center">{index + 1}</TableCell>
-                                            <TableCell className="text-center">{point.name}</TableCell>
-                                            <TableCell className="text-center">
-                                                {point.coordinates.map((coord) => `(${coord.lat}, ${coord.lng})`).join(", ")}
-                                            </TableCell>
-                                            <TableCell className="text-center">
-                                                <Button variant="ghost" size="icon" onClick={() => { }}>
-                                                    <ChevronRight />
-                                                </Button>
-                                                <Button variant="ghost" size="icon" onClick={() => { }}>
-                                                    <Trash2 />
-                                                </Button>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
+
+                                    {
+                                        Array.isArray(points) && points.map((point, index) => (
+                                            <TableRow key={point.id}>
+                                                <TableCell className="text-center">{index + 1}</TableCell>
+                                                <TableCell className="text-center">{point.name}</TableCell>
+                                                <TableCell className="text-center">
+                                                    <Dialog
+                                                        open={openDialog === point.id}
+                                                    >
+                                                        <DialogTrigger asChild>
+                                                            <Button
+                                                                variant="destructive"
+                                                                onClick={() => setOpenDialog(point.id)}
+                                                            >
+                                                                <Trash2 size={16} />
+                                                            </Button>
+                                                        </DialogTrigger>
+                                                        <DialogContent>
+                                                            <DialogHeader>
+                                                                <DialogTitle>Удалить точку?</DialogTitle>
+                                                                <DialogDescription>
+                                                                    Вы уверены что хотите удалить: <span className="text-lg text-blue-800 font-semibold">{point.name} </span>?
+                                                                </DialogDescription>
+                                                            </DialogHeader>
+                                                            <div className="flex gap-4 justify-end mt-4">
+                                                                <Button
+                                                                    onClick={() => setOpenDialog(null)}
+                                                                    disabled={loading}
+                                                                >
+                                                                    Отмена
+                                                                </Button>
+                                                                <Button
+                                                                    variant="destructive"
+                                                                    onClick={() => {
+                                                                        handleDeletePoint(point.id);
+                                                                        setOpenDialog(null);
+                                                                    }}
+                                                                >
+                                                                    Удалить
+                                                                </Button>
+                                                            </div>
+                                                        </DialogContent>
+                                                    </Dialog>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
                                 </TableBody>
                             </Table>
                         )}
