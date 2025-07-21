@@ -72,10 +72,10 @@ export default function AddRegion({ onBack }: AddRegionProps): JSX.Element {
   };
 
   const saveRegion = async () => {
-    // if (!regionName.trim()) {
-    //   alert('Введите название региона');
-    //   return;
-    // }
+    if (!areaName.trim()) {
+      alert('Введите название области');
+      return;
+    }
 
     if (polygonPoints.length < 3) {
       alert('Регион должен состоять минимум из 3 точек');
