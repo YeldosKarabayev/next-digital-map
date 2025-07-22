@@ -20,6 +20,7 @@ import SpotsPointForm from "./SpotsPointsForm";
 import { AddProvider } from "./shared/AddProviderForm";
 import AddRegion from "./AddRegion";
 import { AddRegionArea } from "./shared/AddRegionArea";
+import EditRegionForm from "./EditRegion";
 
 
 interface Spot {
@@ -143,8 +144,10 @@ export default function Spots() {
                   <TableHeader>
                     <TableRow>
                       <TableHead className="text-center">№</TableHead>
+                      {/* <TableHead className="text-center">ID</TableHead> */}
                       <TableHead className="text-center">Название</TableHead>
                       <TableHead className="text-center">Цвет</TableHead>
+                      <TableHead className="text-center">Редактировать</TableHead>
                       <TableHead className="text-center">Действия</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -159,6 +162,7 @@ export default function Spots() {
                       spots.map((spot, index) => (
                         <TableRow key={spot.id}>
                           <TableCell className="text-center">{index + 1}</TableCell>
+                          {/* <TableCell>{spot.id}</TableCell> */}
                           <TableCell className="text-center">{spot.name}</TableCell>
                           <TableCell className="text-center">
                             <div className="flex items-center justify-center gap-2">
@@ -169,7 +173,9 @@ export default function Spots() {
                             </div>
                           </TableCell>
                           {/* <TableCell className="text-center">{spot.coordinates.map(coord => `(${coord.lat}, ${coord.lng})`).join(', ')}</TableCell> */}
-
+                          <TableCell className="text-center">
+                              <EditRegionForm spotId={spot.id}/>
+                          </TableCell>
                           <TableCell className="text-center">
                             <Dialog open={openDialog === spot.id}
                             // onOpenChange={() => setOpenDialog(null)}
@@ -232,4 +238,3 @@ export default function Spots() {
     </motion.div>
   )
 }
-
