@@ -238,8 +238,8 @@ export const MapWithControls = () => {
             onChange={(e) => setSelectedRegion(e.target.value)}
             value={selectedRegion}
           >
-            <option value="">Выберите пятно</option>
-            <option value="all">Все пятна</option>
+            <option value="">Выберите оператора</option>
+            <option value="all">Все операторы</option>
             {regions.map(region => (
               <option key={region.id} value={region.id}>{region.name}</option>
             ))}
