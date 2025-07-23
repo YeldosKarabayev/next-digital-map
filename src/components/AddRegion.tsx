@@ -145,7 +145,7 @@ export default function AddRegion({ onBack }: AddRegionProps): JSX.Element {
           value={regionId ?? ''}
           onChange={handleRegionNameChange}
         >
-          <option value="">Выберите регион</option>
+          <option value="">Выберите оператора из списка</option>
           {regions.map((region) => (
             <option key={region.id} value={region.id}>
               {region.name}
@@ -155,7 +155,7 @@ export default function AddRegion({ onBack }: AddRegionProps): JSX.Element {
 
         <input
           type="text"
-          placeholder="Название оператора"
+          placeholder="Введите название пятна"
           value={areaName}
           onChange={(e) => setAreaName(e.target.value)}
           className="p-2 border rounded"
