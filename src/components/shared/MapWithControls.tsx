@@ -231,15 +231,15 @@ export const MapWithControls = () => {
         </div>
 
         <div className="flex gap-2 items-center">
-          <label htmlFor="region-select" className="text-white">Фильтр регионов:</label>
+          <label htmlFor="region-select" className="text-white">Фильтр пятен:</label>
           <select
             id="region-select"
             className="border px-2 py-1 rounded"
             onChange={(e) => setSelectedRegion(e.target.value)}
             value={selectedRegion}
           >
-            <option value="">Выберите регион</option>
-            <option value="all">Все регионы</option>
+            <option value="">Выберите пятно</option>
+            <option value="all">Все пятна</option>
             {regions.map(region => (
               <option key={region.id} value={region.id}>{region.name}</option>
             ))}
