@@ -123,7 +123,7 @@ export default function SpotsPointForm({ regionId, onClose, name, onBack }: Poin
 
                             <div className="flex items-center justify-between mb-4">
                                 <h1 className="text-2xl font-semibold text-gray-600 mb-2">
-                                    Точки региона: <span className="text-orange-400">{name}</span>
+                                    Точки пятен: <span className="text-orange-400">{name}</span>
                                 </h1>
 
                                 <button

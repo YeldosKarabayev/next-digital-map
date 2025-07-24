@@ -231,7 +231,7 @@ export const MapWithControls = () => {
         </div>
 
         <div className="flex gap-2 items-center">
-          <label htmlFor="region-select" className="text-white">Фильтр пятен:</label>
+          <label htmlFor="region-select" className="text-white">Фильтр белых пятен:</label>
           <select
             id="region-select"
             className="border px-2 py-1 rounded"
